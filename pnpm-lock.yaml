@@ -10,6 +10,9 @@ importers:
 
   app/frontend:
     dependencies:
+      '@wb-ip-ams/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       react:
         specifier: ^19.2.0
         version: 19.2.4
