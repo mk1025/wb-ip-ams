@@ -1,0 +1,32 @@
+{
+  "name": "wb-ip-ams",
+  "version": "1.0.0",
+  "description": "Web-Based IP Address Management System",
+  "private": true,
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev:frontend": "pnpm --filter frontend dev",
+    "build:types": "pnpm --filter @wb-ip-ams/shared-types build",
+    "build": "pnpm -r build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mk1025/wb-ip-ams.git"
+  },
+  "author": {
+    "name": "Mark Roland Alueta",
+    "email": "markalueta.dev@gmail.com",
+    "url": "https://www.linkedin.com/in/mark-roland-alueta/"
+  },
+  "bugs": {
+    "url": "https://github.com/mk1025/wb-ip-ams/issues"
+  },
+  "workspaces": [
+    "packages/*",
+    "app/frontend"
+  ]
+}
