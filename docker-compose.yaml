@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  mysql-auth:
+    image: mysql:8.0
+    container_name: wb-ip-ams-mysql-auth
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: auth_service_db
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-auth-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-ip:
+    image: mysql:8.0
+    container_name: wb-ip-ams-mysql-ip
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ip_service_db
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql-ip-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql-auth-data:
+  mysql-ip-data:
