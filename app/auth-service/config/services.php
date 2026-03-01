@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'ip' => [
+        'url' => env('IP_SERVICE_URL', 'http://localhost:8001'),
+    ]
+
 ];
