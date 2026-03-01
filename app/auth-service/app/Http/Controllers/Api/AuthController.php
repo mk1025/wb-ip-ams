@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RefreshTokenRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Models\AuthAuditLog;
 use App\Models\RefreshToken;
@@ -11,7 +14,6 @@ use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
@@ -20,17 +22,8 @@ class AuthController extends Controller
     use ApiResponseTrait;
 
     // Register new user
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->validationError($validator->errors());
-        }
-
         $user = User::create([
             'email' => $request->email,
             'password' => Hash::make($request->password),
@@ -57,17 +50,8 @@ class AuthController extends Controller
     }
 
     // Login user
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->validationError($validator->errors());
-        }
-
         $credentials = $request->only('email', 'password');
 
 
@@ -126,16 +110,8 @@ class AuthController extends Controller
 
 
     // Refresh access token using refresh token
-    public function refresh(Request $request)
+    public function refresh(RefreshTokenRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'refresh_token' => 'required|string',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->validationError($validator->errors());
-        }
-
         $refreshToken = RefreshToken::where('token', $request->refresh_token)->first();
 
         if (! $refreshToken || $refreshToken->isExpired()) {
@@ -185,9 +161,9 @@ class AuthController extends Controller
     private function syncUserToIpService($user)
     {
         try {
-            $ipServiceUrl = config('app.ip_service_url', env('IP_SERVICE_URL', 'http://localhost:8001'));
+            $url = config('services.ip.url', default: 'http://localhost:8001');
 
-            Http::timeout(5)->post("{$ipServiceUrl}/api/internal/users/sync", [
+            Http::timeout(5)->post("{$url}/api/internal/users/sync", [
                 'id' => $user->id,
                 'email' => $user->email,
                 'role' => $user->role,
