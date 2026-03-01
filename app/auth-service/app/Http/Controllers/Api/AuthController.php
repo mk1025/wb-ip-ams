@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RefreshTokenRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Http\Resources\AuthResource;
+use App\Http\Resources\TokenResource;
 use App\Http\Resources\UserResource;
 use App\Models\AuthAuditLog;
 use App\Models\RefreshToken;
@@ -38,15 +40,9 @@ class AuthController extends Controller
 
         $this->logAuthEvent($user, 'register', $request);
 
-        return $this->created([
-            'user' => new UserResource($user),
-            'tokens' => [
-                'access_token' => $accessToken,
-                'refresh_token' => $refreshToken->token,
-                'token_type' => 'bearer',
-                'expires_in' => config('jwt.ttl') * 60,
-            ],
-        ]);
+        $resource = new AuthResource($user, $accessToken, $refreshToken->token);
+
+        return $this->created($resource);
     }
 
     // Login user
@@ -73,15 +69,9 @@ class AuthController extends Controller
         // Log the login
         $this->logAuthEvent($user, 'login', $request);
 
-        return $this->success([
-            'user' => new UserResource($user),
-            'tokens' => [
-                'access_token' => $token,
-                'refresh_token' => $refreshToken->token,
-                'token_type' => 'bearer',
-                'expires_in' => config('jwt.ttl') * 60,
-            ],
-        ]);
+        $resource = new AuthResource($user, $token, $refreshToken->token);
+
+        return $this->success($resource);
     }
 
     // Logout user
@@ -124,11 +114,9 @@ class AuthController extends Controller
 
         $this->logAuthEvent($user, 'token_refresh', $request);
 
-        return $this->success([
-            'access_token' => $newAccessToken,
-            'token_type' => 'bearer',
-            'expires_in' => config('jwt.ttl') * 60,
-        ]);
+        $resource = new TokenResource($newAccessToken);
+
+        return $this->success($resource);
     }
 
     // PRIVATES

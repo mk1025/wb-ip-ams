@@ -9,8 +9,6 @@ export interface TableUser {
   updated_at: string;
 }
 
-export interface UserResource extends Omit<TableUser, "password"> {}
-
 // SESSIONS
 
 export interface TableSessions {
@@ -32,4 +30,24 @@ export interface TableAuditLogs {
   user_agent: string | null;
   session_id: string | null;
   created_at: string;
+}
+
+// RESOURCES
+
+export interface UserResource extends Omit<TableUser, "password"> {}
+
+export interface AuthResource {
+  user: UserResource;
+  tokens: {
+    access_token: string;
+    refresh_token: string;
+    token_type: string;
+    expires_in: number;
+  };
+}
+
+export interface TokenResource {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
 }
