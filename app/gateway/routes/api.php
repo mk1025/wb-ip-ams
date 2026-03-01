@@ -1,8 +1,12 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\GatewayController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+// Auth Service routes - public
+Route::any('/auth/{path?}', [GatewayController::class, 'forwardToAuth'])
+    ->where('path', '.*');
+
+// IP Service routes - just forward, let IP service validate JWT
+Route::any('/ip-addresses/{path?}', [GatewayController::class, 'forwardToIp'])
+    ->where('path', '.*');

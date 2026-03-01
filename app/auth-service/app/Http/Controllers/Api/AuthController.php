@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
@@ -36,10 +37,12 @@ class AuthController extends Controller
             'role' => 'user', // Default role
         ]);
 
+        // Sync user to IP service
+        $this->syncUserToIpService($user);
+
         $accessToken = JWTAuth::fromUser($user);
         $refreshToken = $this->createRefreshToken($user);
 
-        // Logging
         $this->logAuthEvent($user, 'register', $request);
 
         return $this->created([
@@ -77,6 +80,10 @@ class AuthController extends Controller
         }
 
         $user = $guard->user();
+
+        // Sync user to IP service on login
+        $this->syncUserToIpService($user);
+
         $refreshToken = $this->createRefreshToken($user);
 
         // Log the login
@@ -148,6 +155,8 @@ class AuthController extends Controller
         ]);
     }
 
+    // PRIVATES
+
     // Create new refresh token for user and delete old ones
     private function createRefreshToken(User $user): RefreshToken
     {
@@ -171,5 +180,21 @@ class AuthController extends Controller
             'session_id' => session()->getId(),
             'created_at' => now(),
         ]);
+    }
+
+    private function syncUserToIpService($user)
+    {
+        try {
+            $ipServiceUrl = config('app.ip_service_url', env('IP_SERVICE_URL', 'http://localhost:8001'));
+
+            Http::timeout(5)->post("{$ipServiceUrl}/api/internal/users/sync", [
+                'id' => $user->id,
+                'email' => $user->email,
+                'role' => $user->role,
+            ]);
+        } catch (\Exception $e) {
+
+            \Log::warning('Failed to sync user to IP service: '.$e->getMessage());
+        }
     }
 }
