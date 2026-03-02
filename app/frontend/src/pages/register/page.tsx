@@ -125,22 +125,31 @@ export default function RegisterPage() {
         </form>
       </CardContent>
       <CardFooter>
-        <Field orientation={"horizontal"} className="justify-end">
-          <div>
-            <p className="text-muted-foreground text-center text-sm">
+        <Field
+          orientation={"horizontal"}
+          className="flex w-full flex-wrap justify-between gap-2.5 md:flex-nowrap"
+        >
+          <div className="grid w-full grid-cols-2 justify-end gap-2.5 md:flex">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => form.reset()}
+            >
+              Reset
+            </Button>
+            <Button type="submit" form="register-form" disabled={isPending}>
+              {isPending && <Spinner />}
+              {isPending ? "Registering..." : "Register"}
+            </Button>
+          </div>
+          <div className="w-full justify-end md:order-first md:justify-start">
+            <p className="text-muted-foreground text-right text-sm md:text-left">
               Already have an account?{" "}
               <Link to="/login" className="text-primary hover:underline">
                 Login
               </Link>
             </p>
           </div>
-          <Button type="button" variant="outline" onClick={() => form.reset()}>
-            Reset
-          </Button>
-          <Button type="submit" form="register-form" disabled={isPending}>
-            {isPending && <Spinner />}
-            {isPending ? "Registering..." : "Register"}
-          </Button>
         </Field>
       </CardFooter>
     </Card>
