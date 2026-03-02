@@ -12,12 +12,13 @@ import type {
   RegisterRequest,
 } from "@/validation/auth";
 import api from "@/lib/axios";
-import { toast } from "sonner";
 import { useAuthStore } from "@/stores/auth-store";
+import { toast } from "sonner";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useRegisterMutation(): UseMutationResult<
   AuthResource,
-  Error,
+  unknown,
   z.infer<typeof RegisterRequest>
 > {
   const { setAuth } = useAuthStore();
@@ -50,12 +51,13 @@ export function useRegisterMutation(): UseMutationResult<
 
       toast.success("Registration successful!", {
         id: AUTH_MUTATION_KEYS.REGISTER.join("."),
+        description: undefined,
       });
     },
     onError: (error) => {
       toast.error("Registration failed", {
         id: AUTH_MUTATION_KEYS.REGISTER.join("."),
-        description: error.message,
+        description: getApiErrorMessage(error),
       });
     },
   });
@@ -63,7 +65,7 @@ export function useRegisterMutation(): UseMutationResult<
 
 export function useLoginMutation(): UseMutationResult<
   AuthResource,
-  Error,
+  unknown,
   z.infer<typeof LoginRequest>
 > {
   const { setAuth } = useAuthStore();
@@ -96,12 +98,13 @@ export function useLoginMutation(): UseMutationResult<
 
       toast.success("Login successful!", {
         id: AUTH_MUTATION_KEYS.LOGIN.join("."),
+        description: undefined,
       });
     },
     onError: (error) => {
       toast.error("Login failed", {
         id: AUTH_MUTATION_KEYS.LOGIN.join("."),
-        description: error.message,
+        description: getApiErrorMessage(error),
       });
     },
   });
@@ -109,7 +112,7 @@ export function useLoginMutation(): UseMutationResult<
 
 export function useLogoutMutation(): UseMutationResult<
   APIResponse<null>,
-  Error,
+  unknown,
   void
 > {
   const { clearAuth } = useAuthStore();
@@ -146,7 +149,7 @@ export function useLogoutMutation(): UseMutationResult<
     onError: (error) => {
       toast.error("Logout failed", {
         id: AUTH_MUTATION_KEYS.LOGOUT.join("."),
-        description: error.message,
+        description: getApiErrorMessage(error),
       });
     },
   });
