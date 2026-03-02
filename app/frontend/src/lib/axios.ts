@@ -25,13 +25,30 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const isAuthEndpoint =
+      originalRequest.url?.includes("/auth/login") ||
+      originalRequest.url?.includes("/auth/register") ||
+      originalRequest.url?.includes("/auth/refresh");
+
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isAuthEndpoint
+    ) {
       originalRequest._retry = true;
 
       try {
         const refreshToken = localStorage.getItem("refresh_token");
         if (!refreshToken) {
-          throw new Error("No refresh token");
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+
+          const currentPath = globalThis.location.pathname;
+          if (currentPath !== "/login" && currentPath !== "/register") {
+            globalThis.location.href = "/login";
+          }
+
+          throw error;
         }
 
         const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, {
@@ -45,7 +62,12 @@ api.interceptors.response.use(
       } catch (refreshError) {
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
-        globalThis.location.href = "/login";
+
+        const currentPath = globalThis.location.pathname;
+        if (currentPath !== "/login" && currentPath !== "/register") {
+          globalThis.location.href = "/login";
+        }
+
         throw refreshError;
       }
     }
