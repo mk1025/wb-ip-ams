@@ -1,19 +1,38 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
 import { Toaster } from "./components/ui/sonner";
+import AuthLayout from "./components/layouts/auth-layout";
+import ProtectedRoute from "./components/protected-route";
+import DashboardLayout from "./components/layouts/dashboard-layout";
+import NotFoundPage from "./pages/not-found-page";
+import LoginPage from "./pages/login/page";
 
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<div>Login Page</div>} />
-        <Route path="/register" element={<div>Register Page</div>} />
-        <Route path="/dashboard" element={<div>Dashboard</div>} />
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<div>Register Page</div>} />
+        </Route>
+
+        <Route element={<ProtectedRoute />}>
+          <Route element={<DashboardLayout />}>
+            <Route path="/dashboard" element={<div>Dashboard Content</div>} />
+          </Route>
+        </Route>
+
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
-      <Toaster />
+      <Toaster
+        richColors
+        position="bottom-right"
+        duration={10_000}
+        closeButton
+        theme="light"
+      />
     </BrowserRouter>
   );
 }
-
-export default App;
