@@ -9,10 +9,10 @@ export default function App() {
       <AppRoutes />
       <Toaster
         richColors
-        position="bottom-right"
+        position="top-center"
         duration={10_000}
         closeButton
-        theme="light"
+        theme="system"
       />
     </BrowserRouter>
   );
