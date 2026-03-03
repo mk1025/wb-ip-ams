@@ -1,6 +1,7 @@
 import AuthLayout from "@/components/layouts/auth-layout";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
 import ProtectedRoute from "@/components/protected-route";
+import DashboardPage from "@/pages/dashboard/page";
 import LoginPage from "@/pages/login/page";
 import NotFoundPage from "@/pages/not-found-page";
 import RegisterPage from "@/pages/register/page";
@@ -18,7 +19,7 @@ export default function AppRoutes() {
       {/* Protected */}
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
-          <Route path="/dashboard" element={<div>Dashboard page</div>} />
+          <Route path="/dashboard" element={<DashboardPage />} />
         </Route>
       </Route>
 
