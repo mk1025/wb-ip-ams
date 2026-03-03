@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\IpValidator;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreIpAddressRequest;
+use App\Http\Requests\UpdateIpAddressRequest;
 use App\Http\Resources\IpAddressResource;
 use App\Models\IpAddress;
 use App\Models\IpAuditLog;
@@ -17,38 +19,16 @@ class IpAddressController extends Controller
 
     public function index(Request $request)
     {
-        /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
-        $guard = auth('api');
-        $user = $guard->user();
-        $userRole = $user->role ?? 'user';
-
-        // Super-admin sees all, regular users see only their own
-        $query = IpAddress::query();
-
-        if ($userRole !== 'super-admin') {
-            $query->where('owner_id', $user->id);
-        }
-
-        $ipAddresses = $query->orderBy('created_at', 'desc')->get();
+        $ipAddresses = IpAddress::query()->orderBy('created_at', 'desc')->get();
 
         return $this->success(IpAddressResource::collection($ipAddresses));
     }
 
-    public function store(Request $request)
+    public function store(StoreIpAddressRequest $request)
     {
         /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
         $guard = auth('api');
         $user = $guard->user();
-
-        $validator = Validator::make($request->all(), [
-            'ip_address' => 'required|string|unique:ip_addresses,ip_address',
-            'label' => 'required|string|max:255',
-            'comment' => 'nullable|string',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->validationError($validator->errors());
-        }
 
         if (! IpValidator::isValid($request->ip_address)) {
             return $this->validationError([
@@ -71,26 +51,16 @@ class IpAddressController extends Controller
 
     public function show(Request $request, int $id)
     {
-        /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
-        $guard = auth('api');
-        $user = $guard->user();
-        $userRole = $user->role ?? 'user';
-
         $ipAddress = IpAddress::find($id);
 
         if (! $ipAddress) {
             return $this->notFound('IP address not found');
         }
 
-        // Check ownership - regular users can only see their own
-        if ($userRole !== 'super-admin' && $ipAddress->owner_id !== $user->id) {
-            return $this->forbidden('You do not have permission to view this IP address');
-        }
-
         return $this->success(new IpAddressResource($ipAddress));
     }
 
-    public function update(Request $request, int $id)
+    public function update(UpdateIpAddressRequest $request, int $id)
     {
         /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
         $guard = auth('api');
@@ -108,27 +78,9 @@ class IpAddressController extends Controller
             return $this->forbidden('You do not have permission to update this IP address');
         }
 
-        $validator = Validator::make($request->all(), [
-            'ip_address' => 'required|string|unique:ip_addresses,ip_address,'.$id,
-            'label' => 'required|string|max:255',
-            'comment' => 'nullable|string',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->validationError($validator->errors());
-        }
-
-        // Validate IP format
-        if (! IpValidator::isValid($request->ip_address)) {
-            return $this->validationError([
-                'ip_address' => ['The IP address must be a valid IPv4 or IPv6 address.']
-            ]);
-        }
-
         $oldValues = $ipAddress->toArray();
 
         $ipAddress->update([
-            'ip_address' => $request->ip_address,
             'label' => $request->label,
             'comment' => $request->comment,
         ]);
@@ -140,6 +92,7 @@ class IpAddressController extends Controller
 
     public function destroy(Request $request, int $id)
     {
+
         /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
         $guard = auth('api');
         $user = $guard->user();
@@ -151,9 +104,9 @@ class IpAddressController extends Controller
             return $this->notFound('IP address not found');
         }
 
-        // Check ownership
-        if ($userRole !== 'super-admin' && $ipAddress->owner_id !== $user->id) {
-            return $this->forbidden('You do not have permission to delete this IP address');
+        // Only super-admins can delete
+        if ($userRole !== 'super-admin') {
+            return $this->forbidden('Only super-admins can delete IP addresses');
         }
 
         $oldValues = $ipAddress->toArray();
