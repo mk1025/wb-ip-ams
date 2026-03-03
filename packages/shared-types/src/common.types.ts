@@ -3,4 +3,5 @@ export interface APIResponse<T = any> {
   data?: T;
   message?: string;
   error?: string;
+  errors?: Record<string, string[]>;
 }

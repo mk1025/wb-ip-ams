@@ -4,6 +4,12 @@ import { AxiosError } from "axios";
 export function getApiErrorMessage(error: unknown): string {
   if (error instanceof AxiosError) {
     const apiResponse = error.response?.data as APIResponse | undefined;
+
+    if (apiResponse?.errors) {
+      const messages = Object.values(apiResponse.errors).flat();
+      if (messages.length > 0) return messages[0];
+    }
+
     return apiResponse?.message || apiResponse?.error || "An error occurred";
   }
 
