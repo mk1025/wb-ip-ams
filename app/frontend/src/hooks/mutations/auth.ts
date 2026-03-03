@@ -23,8 +23,11 @@ export function useRegisterMutation(): UseMutationResult<
 > {
   const { setAuth } = useAuthStore();
 
+  const mutationKey = [AUTH_MUTATION_KEYS.REGISTER.join(".")];
+  const toastId = mutationKey.join(".");
+
   return useMutation({
-    mutationKey: [AUTH_MUTATION_KEYS.REGISTER.join(".")],
+    mutationKey,
     mutationFn: async (payload) => {
       const response = await api.post<APIResponse<AuthResource>>(
         "/auth/register",
@@ -39,7 +42,7 @@ export function useRegisterMutation(): UseMutationResult<
     },
     onMutate: () => {
       toast.loading("Registering...", {
-        id: AUTH_MUTATION_KEYS.REGISTER.join("."),
+        id: toastId,
         description: undefined,
       });
     },
@@ -50,13 +53,13 @@ export function useRegisterMutation(): UseMutationResult<
       setAuth(data.user, data.tokens.access_token);
 
       toast.success("Registration successful!", {
-        id: AUTH_MUTATION_KEYS.REGISTER.join("."),
+        id: toastId,
         description: undefined,
       });
     },
     onError: (error) => {
       toast.error("Registration failed", {
-        id: AUTH_MUTATION_KEYS.REGISTER.join("."),
+        id: toastId,
         description: getApiErrorMessage(error),
       });
     },
@@ -70,8 +73,11 @@ export function useLoginMutation(): UseMutationResult<
 > {
   const { setAuth } = useAuthStore();
 
+  const mutationKey = [AUTH_MUTATION_KEYS.LOGIN.join(".")];
+  const toastId = mutationKey.join(".");
+
   return useMutation({
-    mutationKey: [AUTH_MUTATION_KEYS.LOGIN.join(".")],
+    mutationKey,
     mutationFn: async (payload) => {
       const response = await api.post<APIResponse<AuthResource>>(
         "/auth/login",
@@ -86,7 +92,7 @@ export function useLoginMutation(): UseMutationResult<
     },
     onMutate: () => {
       toast.loading("Logging in...", {
-        id: AUTH_MUTATION_KEYS.LOGIN.join("."),
+        id: toastId,
         description: undefined,
       });
     },
@@ -97,13 +103,13 @@ export function useLoginMutation(): UseMutationResult<
       setAuth(data.user, data.tokens.access_token);
 
       toast.success("Login successful!", {
-        id: AUTH_MUTATION_KEYS.LOGIN.join("."),
+        id: toastId,
         description: undefined,
       });
     },
     onError: (error) => {
       toast.error("Login failed", {
-        id: AUTH_MUTATION_KEYS.LOGIN.join("."),
+        id: toastId,
         description: getApiErrorMessage(error),
       });
     },
@@ -117,8 +123,11 @@ export function useLogoutMutation(): UseMutationResult<
 > {
   const { clearAuth } = useAuthStore();
 
+  const mutationKey = [AUTH_MUTATION_KEYS.LOGOUT.join(".")];
+  const toastId = mutationKey.join(".");
+
   return useMutation({
-    mutationKey: [AUTH_MUTATION_KEYS.LOGOUT.join(".")],
+    mutationKey,
     mutationFn: async () => {
       const response = await api.post<APIResponse<null>>("/auth/logout");
 
@@ -130,7 +139,7 @@ export function useLogoutMutation(): UseMutationResult<
     },
     onMutate: () => {
       toast.loading("Logging out...", {
-        id: AUTH_MUTATION_KEYS.LOGOUT.join("."),
+        id: toastId,
         description: undefined,
       });
     },
@@ -142,13 +151,13 @@ export function useLogoutMutation(): UseMutationResult<
       const message = data.message || "Logout successful!";
 
       toast.success(message, {
-        id: AUTH_MUTATION_KEYS.LOGOUT.join("."),
+        id: toastId,
         description: undefined,
       });
     },
     onError: (error) => {
       toast.error("Logout failed", {
-        id: AUTH_MUTATION_KEYS.LOGOUT.join("."),
+        id: toastId,
         description: getApiErrorMessage(error),
       });
     },
@@ -162,8 +171,11 @@ export function useRefreshTokenMutation(): UseMutationResult<
 > {
   const { updateToken, clearAuth } = useAuthStore();
 
+  const mutationKey = [AUTH_MUTATION_KEYS.REFRESH.join(".")];
+  const toastId = mutationKey.join(".");
+
   return useMutation({
-    mutationKey: [AUTH_MUTATION_KEYS.REFRESH.join(".")],
+    mutationKey,
     mutationFn: async (payload) => {
       const response = await api.post<APIResponse<TokenResource>>(
         "/auth/refresh",
@@ -187,7 +199,7 @@ export function useRefreshTokenMutation(): UseMutationResult<
       clearAuth();
 
       toast.error("Session expired. Please log in again.", {
-        id: AUTH_MUTATION_KEYS.REFRESH.join("."),
+        id: toastId,
         description: error.message,
       });
     },
