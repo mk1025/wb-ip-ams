@@ -1,6 +1,8 @@
 import AuthLayout from "@/components/layouts/auth-layout";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
 import ProtectedRoute from "@/components/protected-route";
+import IpForm from "@/pages/dashboard/ips/_forms/IpForm";
+import IpListPage from "@/pages/dashboard/ips/page";
 import DashboardPage from "@/pages/dashboard/page";
 import LoginPage from "@/pages/login/page";
 import NotFoundPage from "@/pages/not-found-page";
@@ -20,6 +22,9 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/ips" element={<IpListPage />} />
+          <Route path="/ips/create" element={<IpForm />} />
+          <Route path="/ips/:id/edit" element={<IpForm />} />
         </Route>
       </Route>
 
