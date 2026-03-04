@@ -10,9 +10,9 @@ export default function App() {
       <Toaster
         richColors
         position="top-center"
-        duration={10_000}
+        duration={5_000}
         closeButton
-        theme="system"
+        theme="light"
       />
     </BrowserRouter>
   );
