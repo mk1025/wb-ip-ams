@@ -1,15 +1,11 @@
 import { useLogoutMutation } from "@/hooks/mutations/auth";
 import { useAuthStore } from "@/stores/auth-store";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Spinner } from "../ui/spinner";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  navigationMenuTriggerStyle,
-} from "../ui/navigation-menu";
+import HeaderMobileMenu from "../common/HeaderMobileMenu";
+import HeaderNavigationMenu from "../common/HeaderNavigationMenu";
+import { LogOutIcon } from "lucide-react";
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
@@ -31,42 +27,15 @@ export default function DashboardLayout() {
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-6">
               <h1 className="text-xl font-bold">IP Address Manager</h1>
-              <NavigationMenu>
-                <NavigationMenuList>
-                  <NavigationMenuItem>
-                    <NavigationMenuLink
-                      asChild
-                      className={navigationMenuTriggerStyle()}
-                    >
-                      <NavLink to="/dashboard">Dashboard</NavLink>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
-                  <NavigationMenuItem>
-                    <NavigationMenuLink
-                      asChild
-                      className={navigationMenuTriggerStyle()}
-                    >
-                      <NavLink to="/ips">IP Addresses</NavLink>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
-                  {isAdmin && (
-                    <NavigationMenuItem>
-                      <NavigationMenuLink
-                        asChild
-                        className={navigationMenuTriggerStyle()}
-                      >
-                        <NavLink to="/audit">Audit Logs</NavLink>
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
-                  )}
-                </NavigationMenuList>
-              </NavigationMenu>
+              <HeaderNavigationMenu />
             </div>
 
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-700">{user?.email}</span>
+              <span className="hidden text-sm text-gray-700 lg:block">
+                {user?.email}
+              </span>
               {isAdmin && (
-                <span className="rounded bg-purple-100 px-2 py-1 text-xs text-purple-800">
+                <span className="hidden rounded bg-purple-100 px-2 py-1 text-xs text-purple-800 lg:block">
                   Super Admin
                 </span>
               )}
@@ -75,10 +44,13 @@ export default function DashboardLayout() {
                 size="sm"
                 onClick={handleLogout}
                 disabled={isPending}
+                className="text-destructive hidden lg:flex"
               >
-                {isPending && <Spinner />}
+                {isPending ? <Spinner /> : <LogOutIcon />}
                 Logout
               </Button>
+
+              <HeaderMobileMenu />
             </div>
           </div>
         </div>
