@@ -27,3 +27,5 @@ export interface TableIpAuditLog {
 // RESOURCES
 
 export interface IpAddressResource extends TableIpAddress {}
+
+export interface IpAuditLogResource extends TableIpAuditLog {}

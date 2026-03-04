@@ -51,3 +51,5 @@ export interface TokenResource {
   token_type: "bearer";
   expires_in: number;
 }
+
+export interface AuditLogResource extends TableAuditLogs {}
