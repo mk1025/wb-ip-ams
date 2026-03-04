@@ -52,4 +52,4 @@ export interface TokenResource {
   expires_in: number;
 }
 
-export interface AuditLogResource extends TableAuditLogs {}
+export interface AuthAuditLogResource extends TableAuditLogs {}
