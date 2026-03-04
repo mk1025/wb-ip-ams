@@ -51,11 +51,13 @@ export default function IpForm() {
   const isPending = isCreating || isUpdating;
 
   const createForm = useForm<CreateValues>({
+    mode: "onChange",
     resolver: zodResolver(StoreIpAddressRequest),
     defaultValues: { ip_address: "", label: "", comment: "" },
   });
 
   const updateForm = useForm<UpdateValues>({
+    mode: "onChange",
     resolver: zodResolver(UpdateIpAddressRequest),
     values: existing
       ? { label: existing.label, comment: existing.comment ?? "" }
