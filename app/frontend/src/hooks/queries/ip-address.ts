@@ -2,6 +2,7 @@ import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import {
   type APIResponse,
   type IpAddressResource,
+  type IpStatsResource,
 } from "@wb-ip-ams/shared-types";
 import { IP_ADDRESS_QUERY_KEYS } from "../keys/ip-address";
 import api from "@/lib/axios";
@@ -45,6 +46,24 @@ export function useGetIpAddress(
       return response.data.data;
     },
     enabled: !!id,
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useGetIpStats(): UseQueryResult<IpStatsResource, Error> {
+  return useQuery({
+    queryKey: [...IP_ADDRESS_QUERY_KEYS.ALL, "stats"],
+    queryFn: async () => {
+      const response = await api.get<APIResponse<IpStatsResource>>(
+        "/ip-addresses/stats",
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || "Failed to fetch IP stats");
+      }
+
+      return response.data.data;
+    },
     staleTime: 30 * 1000,
   });
 }
