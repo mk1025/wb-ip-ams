@@ -10,3 +10,9 @@ Route::any('/auth/{path?}', [GatewayController::class, 'forwardToAuth'])
 // IP Service routes - just forward, let IP service validate JWT
 Route::any('/ip-addresses/{path?}', [GatewayController::class, 'forwardToIp'])
     ->where('path', '.*');
+
+Route::any('/audit/auth', [GatewayController::class, 'forwardToAuth'])
+    ->defaults('path', 'audit-logs');
+
+Route::any('/audit/ip', [GatewayController::class, 'forwardToIp'])
+    ->defaults('path', 'audit-logs');
