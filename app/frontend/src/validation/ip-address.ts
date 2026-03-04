@@ -1,7 +1,13 @@
 import z from "zod";
 
 export const StoreIpAddressRequest = z.object({
-  ip_address: z.string().min(1, "IP address is required"),
+  ip_address: z.union(
+    [
+      z.ipv4("Invalid IPv4 or IPv6 address"),
+      z.ipv6("Invalid IPv4 or IPv6 address"),
+    ],
+    "Invalid IPv4 or IPv6 address",
+  ),
   label: z
     .string()
     .min(1, "Label is required")
