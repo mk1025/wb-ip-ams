@@ -53,31 +53,37 @@ export default function DashboardPage() {
                 <NetworkIcon className="text-muted-foreground size-5" />
               </CardAction>
             </CardHeader>
-            <CardContent className="flex-1 space-y-3">
+            <CardContent className="flex-1">
               {statsLoading ? (
-                <div className="space-y-2">
-                  <Skeleton className="h-8 w-16" />
-                  <Skeleton className="h-4 w-24" />
+                <div className="flex gap-6">
+                  <div className="space-y-1">
+                    <Skeleton className="h-8 w-12" />
+                    <Skeleton className="h-3 w-10" />
+                  </div>
+                  <div className="space-y-1">
+                    <Skeleton className="h-8 w-12" />
+                    <Skeleton className="h-3 w-10" />
+                  </div>
                 </div>
               ) : (
-                <>
-                  <p className="text-2xl font-bold">{stats?.total ?? 0}</p>
-                  <div className="text-muted-foreground flex items-center gap-3 text-xs">
-                    <span>
-                      <span className="text-foreground font-semibold">
-                        {stats?.mine ?? 0}
-                      </span>{" "}
-                      yours
+                <div className="flex items-stretch gap-0 divide-x">
+                  <div className="flex flex-col pr-6">
+                    <span className="text-3xl font-bold tabular-nums">
+                      {stats?.total ?? 0}
                     </span>
-                    <span className="text-border">·</span>
-                    <span>
-                      <span className="text-foreground font-semibold">
-                        {stats?.total ?? 0}
-                      </span>{" "}
-                      total
+                    <span className="text-muted-foreground mt-1 text-xs">
+                      Total
                     </span>
                   </div>
-                </>
+                  <div className="flex flex-col pl-6">
+                    <span className="text-3xl font-bold tabular-nums">
+                      {stats?.mine ?? 0}
+                    </span>
+                    <span className="text-muted-foreground mt-1 text-xs">
+                      Added by you
+                    </span>
+                  </div>
+                </div>
               )}
             </CardContent>
             <CardFooter>
