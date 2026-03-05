@@ -59,8 +59,11 @@ export function IpListColumns({
     {
       accessorKey: "created_at",
       header: "Created",
-      cell: ({ row }) =>
-        new Date(row.getValue("created_at")).toLocaleDateString(),
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">
+          {new Date(row.getValue("created_at")).toLocaleString()}
+        </span>
+      ),
     },
     {
       id: "actions",
