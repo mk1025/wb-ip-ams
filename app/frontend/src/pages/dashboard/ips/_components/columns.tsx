@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontalIcon } from "lucide-react";
+import { MoreHorizontalIcon, PenIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { DeleteIpDialog } from "./dialogs/DeleteIpDialog";
 
@@ -87,7 +87,10 @@ export function IpListColumns({
               <DropdownMenuSeparator />
               {canEdit && (
                 <DropdownMenuItem asChild>
-                  <Link to={`/ips/${ip.id}/edit`}>Edit</Link>
+                  <Link to={`/ips/${ip.id}/edit`}>
+                    <PenIcon className="size-4" />
+                    Edit
+                  </Link>
                 </DropdownMenuItem>
               )}
               {isAdmin && <DeleteIpDialog ip={ip} />}

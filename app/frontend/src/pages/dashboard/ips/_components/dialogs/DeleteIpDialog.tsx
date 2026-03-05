@@ -12,6 +12,7 @@ import {
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { useDeleteIpAddressMutation } from "@/hooks/mutations/ip-address";
 import type { IpAddressResource } from "@wb-ip-ams/shared-types";
+import { TrashIcon } from "lucide-react";
 
 export function DeleteIpDialog({ ip }: { ip: IpAddressResource }) {
   const { mutateAsync: deleteIp, isPending: isDeleting } =
@@ -25,10 +26,11 @@ export function DeleteIpDialog({ ip }: { ip: IpAddressResource }) {
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <DropdownMenuItem
-          className="text-destructive"
+          variant="destructive"
           disabled={isDeleting}
           onSelect={(e) => e.preventDefault()}
         >
+          <TrashIcon className="size-4" />
           Delete
         </DropdownMenuItem>
       </AlertDialogTrigger>
