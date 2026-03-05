@@ -1,4 +1,8 @@
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  type UseQueryResult,
+} from "@tanstack/react-query";
 import {
   type APIResponse,
   type IpAddressResource,
@@ -30,6 +34,7 @@ export function useGetIpAddresses({
       return response.data.data;
     },
     staleTime: 30 * 1000, // 30 seconds
+    placeholderData: keepPreviousData,
   });
 }
 

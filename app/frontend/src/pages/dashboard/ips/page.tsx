@@ -6,12 +6,18 @@ import { Link } from "react-router-dom";
 import { IpListColumns } from "./_components/columns";
 import { IpListDataTable } from "./_components/data-table";
 import { useMemo, useState } from "react";
+import { useDebounce } from "@/hooks/use-debounce";
+import { PlusIcon } from "lucide-react";
 
 export default function IpListPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 400);
 
-  const { data, isLoading, isError } = useGetIpAddresses({ page, search });
+  const { data, isLoading, isFetching, isError } = useGetIpAddresses({
+    page,
+    search: debouncedSearch,
+  });
   const user = useAuthStore((state) => state.user);
 
   const isAdmin = user?.role === "super-admin";
@@ -47,11 +53,15 @@ export default function IpListPage() {
           </p>
         </div>
         <Button asChild>
-          <Link to="/ips/create">Add IP Address</Link>
+          <Link to="/ips/create">
+            <PlusIcon className="size-4" />
+            Add IP Address
+          </Link>
         </Button>
       </div>
 
       <IpListDataTable
+        isFetching={isFetching}
         columns={columns}
         data={data?.data ?? []}
         currentPage={data?.current_page ?? 1}

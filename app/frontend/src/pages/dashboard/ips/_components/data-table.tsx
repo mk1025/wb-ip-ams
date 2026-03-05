@@ -14,9 +14,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import CustomTablePagination from "@/components/common/CustomTablePagination";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { SearchIcon } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -27,6 +34,7 @@ interface DataTableProps<TData, TValue> {
   search: string;
   onSearchChange: (value: string) => void;
   onPageChange: (page: number) => void;
+  isFetching?: boolean;
 }
 
 export function IpListDataTable<TData, TValue>({
@@ -38,6 +46,7 @@ export function IpListDataTable<TData, TValue>({
   search,
   onSearchChange,
   onPageChange,
+  isFetching,
 }: DataTableProps<TData, TValue>) {
   /*
    * This is new.
@@ -62,14 +71,23 @@ export function IpListDataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      <Input
-        placeholder="Filter by IP address..."
-        value={search}
-        onChange={(e) => onSearchChange(e.target.value)}
-        className="max-w-sm"
-      />
-
-      <div className="overflow-hidden rounded-md border">
+      <InputGroup className="max-w-xs">
+        <InputGroupInput
+          placeholder="Filter by IP address..."
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+        />
+        <InputGroupAddon>
+          {isFetching ? <Spinner /> : <SearchIcon />}
+        </InputGroupAddon>
+        <InputGroupAddon align="inline-end">{total} results</InputGroupAddon>
+      </InputGroup>
+      <div
+        className={cn(
+          "overflow-hidden rounded-md border",
+          isFetching && "pointer-events-none cursor-progress opacity-60",
+        )}
+      >
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
