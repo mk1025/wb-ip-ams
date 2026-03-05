@@ -1,13 +1,10 @@
 import {
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
   type ColumnDef,
   type SortingState,
-  type ColumnFiltersState,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -17,18 +14,30 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import CustomTablePagination from "@/components/common/CustomTablePagination";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  currentPage: number;
+  lastPage: number;
+  total: number;
+  search: string;
+  onSearchChange: (value: string) => void;
+  onPageChange: (page: number) => void;
 }
 
 export function IpListDataTable<TData, TValue>({
   columns,
   data,
+  currentPage,
+  lastPage,
+  total,
+  search,
+  onSearchChange,
+  onPageChange,
 }: DataTableProps<TData, TValue>) {
   /*
    * This is new.
@@ -39,20 +48,15 @@ export function IpListDataTable<TData, TValue>({
   "use no memo";
 
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     state: {
       sorting,
-      columnFilters,
     },
   });
 
@@ -60,12 +64,8 @@ export function IpListDataTable<TData, TValue>({
     <div className="space-y-4">
       <Input
         placeholder="Filter by IP address..."
-        value={
-          (table.getColumn("ip_address")?.getFilterValue() as string) ?? ""
-        }
-        onChange={(e) =>
-          table.getColumn("ip_address")?.setFilterValue(e.target.value)
-        }
+        value={search}
+        onChange={(e) => onSearchChange(e.target.value)}
         className="max-w-sm"
       />
 
@@ -116,29 +116,12 @@ export function IpListDataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
-      </div>
-
-      <div className="flex items-center justify-end gap-2">
-        <span className="text-muted-foreground text-sm">
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount()}
-        </span>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
+        <CustomTablePagination
+          currentPage={currentPage}
+          lastPage={lastPage}
+          total={total}
+          onPageChange={onPageChange}
+        />
       </div>
     </div>
   );

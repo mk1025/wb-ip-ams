@@ -36,7 +36,7 @@ class AuthAuditLogController extends Controller
             $query->where('session_id', $request->session_id);
         }
 
-        $logs = $query->paginate(50);
+        $logs = $query->paginate(15);
 
         return $this->success($logs);
     }

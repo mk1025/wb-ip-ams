@@ -5,10 +5,13 @@ import { Spinner } from "@/components/ui/spinner";
 import { Link } from "react-router-dom";
 import { IpListColumns } from "./_components/columns";
 import { IpListDataTable } from "./_components/data-table";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 export default function IpListPage() {
-  const { data: ipAddresses, isLoading, isError } = useGetIpAddresses();
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+
+  const { data, isLoading, isError } = useGetIpAddresses({ page, search });
   const user = useAuthStore((state) => state.user);
 
   const isAdmin = user?.role === "super-admin";
@@ -48,7 +51,19 @@ export default function IpListPage() {
         </Button>
       </div>
 
-      <IpListDataTable columns={columns} data={ipAddresses ?? []} />
+      <IpListDataTable
+        columns={columns}
+        data={data?.data ?? []}
+        currentPage={data?.current_page ?? 1}
+        lastPage={data?.last_page ?? 1}
+        total={data?.total ?? 0}
+        search={search}
+        onSearchChange={(val) => {
+          setSearch(val);
+          setPage(1);
+        }}
+        onPageChange={setPage}
+      />
     </div>
   );
 }

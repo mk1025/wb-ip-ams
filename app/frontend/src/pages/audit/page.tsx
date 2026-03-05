@@ -7,21 +7,25 @@ import { useAuthStore } from "@/stores/auth-store";
 import { Navigate } from "react-router-dom";
 import AuthLogsTable from "./_components/AuthLogsTable";
 import IpLogsTable from "./_components/IpLogsTable";
+import { useState } from "react";
 
 export default function AuditLogPage() {
   const user = useAuthStore((state) => state.user);
+
+  const [authPage, setAuthPage] = useState(1);
+  const [ipPage, setIpPage] = useState(1);
 
   const {
     data: authLogs,
     isLoading: isLoadingAuth,
     isError: isErrorAuth,
-  } = useGetAuthAuditLogs();
+  } = useGetAuthAuditLogs(authPage);
 
   const {
     data: ipLogs,
     isLoading: isLoadingIp,
     isError: isErrorIp,
-  } = useGetIpAuditLogs();
+  } = useGetIpAuditLogs(ipPage);
 
   if (user?.role !== "super-admin") {
     return <Navigate to="/dashboard" replace />;
@@ -47,6 +51,10 @@ export default function AuditLogPage() {
             isLoading={isLoadingAuth}
             isError={isErrorAuth}
             data={authLogs?.data ?? []}
+            currentPage={authPage}
+            lastPage={authLogs?.last_page ?? 1}
+            total={authLogs?.total ?? 0}
+            onPageChange={(page) => setAuthPage(page)}
           />
         </TabsContent>
 
@@ -55,6 +63,10 @@ export default function AuditLogPage() {
             isLoading={isLoadingIp}
             isError={isErrorIp}
             data={ipLogs?.data ?? []}
+            currentPage={ipPage}
+            lastPage={ipLogs?.last_page ?? 1}
+            total={ipLogs?.total ?? 0}
+            onPageChange={(page) => setIpPage(page)}
           />
         </TabsContent>
       </Tabs>

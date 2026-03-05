@@ -8,19 +8,17 @@ import type {
 import { AUDIT_LOG_QUERY_KEYS } from "../keys/audit-log";
 import api from "@/lib/axios";
 
-export function useGetAuthAuditLogs(): UseQueryResult<
-  PaginatedResponse<AuthAuditLogResource>,
-  Error
-> {
-  const queryKey = [...AUDIT_LOG_QUERY_KEYS.AUTH_LIST];
+export function useGetAuthAuditLogs(
+  page = 1,
+): UseQueryResult<PaginatedResponse<AuthAuditLogResource>, Error> {
+  const queryKey = [...AUDIT_LOG_QUERY_KEYS.AUTH_LIST, page];
 
   return useQuery({
     queryKey,
     queryFn: async () => {
-      const response =
-        await api.get<APIResponse<PaginatedResponse<AuthAuditLogResource>>>(
-          "/audit/auth",
-        );
+      const response = await api.get<
+        APIResponse<PaginatedResponse<AuthAuditLogResource>>
+      >("/audit/auth", { params: { page } });
 
       if (!response.data.success || !response.data.data) {
         throw new Error(
@@ -34,19 +32,17 @@ export function useGetAuthAuditLogs(): UseQueryResult<
   });
 }
 
-export function useGetIpAuditLogs(): UseQueryResult<
-  PaginatedResponse<IpAuditLogResource>,
-  Error
-> {
-  const queryKey = [...AUDIT_LOG_QUERY_KEYS.IP_LIST];
+export function useGetIpAuditLogs(
+  page = 1,
+): UseQueryResult<PaginatedResponse<IpAuditLogResource>, Error> {
+  const queryKey = [...AUDIT_LOG_QUERY_KEYS.IP_LIST, page];
 
   return useQuery({
     queryKey,
     queryFn: async () => {
-      const response =
-        await api.get<APIResponse<PaginatedResponse<IpAuditLogResource>>>(
-          "/audit/ip",
-        );
+      const response = await api.get<
+        APIResponse<PaginatedResponse<IpAuditLogResource>>
+      >("/audit/ip", { params: { page } });
 
       if (!response.data.success || !response.data.data) {
         throw new Error(

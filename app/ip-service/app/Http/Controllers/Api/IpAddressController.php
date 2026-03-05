@@ -19,9 +19,17 @@ class IpAddressController extends Controller
 
     public function index(Request $request)
     {
-        $ipAddresses = IpAddress::query()->orderBy('created_at', 'desc')->get();
+        $query = IpAddress::query()->orderBy('created_at', 'desc');
 
-        return $this->success(IpAddressResource::collection($ipAddresses));
+        if ($request->filled('search')) {
+            $query->where('ip_address', 'like', '%'.$request->search.'%');
+        }
+
+        $ipAddresses = $query->paginate(15);
+
+        return $this->success(
+            $ipAddresses->through(fn ($ip) => new IpAddressResource($ip))
+        );
     }
 
     public function store(StoreIpAddressRequest $request)

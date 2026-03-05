@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import type { AuthAuditLogResource } from "@wb-ip-ams/shared-types";
+import CustomTablePagination from "../../../components/common/CustomTablePagination";
 
 function getAuthActionColor(action: string): string {
   switch (action) {
@@ -29,10 +30,18 @@ export default function AuthLogsTable({
   isLoading = false,
   isError = false,
   data = [],
+  currentPage = 1,
+  lastPage = 1,
+  total = 0,
+  onPageChange,
 }: {
   isLoading?: boolean;
   isError?: boolean;
   data?: AuthAuditLogResource[];
+  currentPage?: number;
+  lastPage?: number;
+  total?: number;
+  onPageChange?: (page: number) => void;
 }) {
   if (isLoading) {
     return (
@@ -102,6 +111,12 @@ export default function AuthLogsTable({
           )}
         </TableBody>
       </Table>
+      <CustomTablePagination
+        currentPage={currentPage}
+        lastPage={lastPage}
+        total={total}
+        onPageChange={(page) => onPageChange?.(page)}
+      />
     </div>
   );
 }

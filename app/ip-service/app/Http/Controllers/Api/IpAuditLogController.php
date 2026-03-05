@@ -40,7 +40,7 @@ class IpAuditLogController extends Controller
             $query->where('session_id', $request->session_id);
         }
 
-        $logs = $query->paginate(50);
+        $logs = $query->paginate(10);
 
         return $this->success($logs);
     }

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { IpAuditLogResource } from "@wb-ip-ams/shared-types";
+import CustomTablePagination from "../../../components/common/CustomTablePagination";
 
 function getIpActionColor(action: string): string {
   switch (action) {
@@ -32,10 +33,18 @@ export default function IpLogsTable({
   isLoading = false,
   isError = false,
   data = [],
+  currentPage = 1,
+  lastPage = 1,
+  total = 0,
+  onPageChange,
 }: {
   isLoading?: boolean;
   isError?: boolean;
   data?: IpAuditLogResource[];
+  currentPage?: number;
+  lastPage?: number;
+  total?: number;
+  onPageChange?: (page: number) => void;
 }) {
   if (isLoading) {
     return (
@@ -113,6 +122,12 @@ export default function IpLogsTable({
           )}
         </TableBody>
       </Table>
+      <CustomTablePagination
+        currentPage={currentPage}
+        lastPage={lastPage}
+        total={total}
+        onPageChange={(page) => onPageChange?.(page)}
+      />
     </div>
   );
 }
