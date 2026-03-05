@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useAuthStore } from "@/stores/auth-store";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -42,6 +43,7 @@ api.interceptors.response.use(
         if (!refreshToken) {
           localStorage.removeItem("access_token");
           localStorage.removeItem("refresh_token");
+          useAuthStore.getState().clearAuth();
 
           const currentPath = globalThis.location.pathname;
           if (currentPath !== "/login" && currentPath !== "/register") {
@@ -62,6 +64,7 @@ api.interceptors.response.use(
       } catch (refreshError) {
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
+        useAuthStore.getState().clearAuth();
 
         const currentPath = globalThis.location.pathname;
         if (currentPath !== "/login" && currentPath !== "/register") {
