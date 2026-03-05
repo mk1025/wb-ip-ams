@@ -44,36 +44,39 @@ export default function IpListPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">IP Addresses</h1>
-          <p className="text-muted-foreground">
-            Manage your IP address records
-          </p>
+    <>
+      <title>IP Addresses - IP Address Manager</title>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">IP Addresses</h1>
+            <p className="text-muted-foreground">
+              Manage your IP address records
+            </p>
+          </div>
+          <Button asChild>
+            <Link to="/ips/create">
+              <PlusIcon className="size-4" />
+              Add IP Address
+            </Link>
+          </Button>
         </div>
-        <Button asChild>
-          <Link to="/ips/create">
-            <PlusIcon className="size-4" />
-            Add IP Address
-          </Link>
-        </Button>
-      </div>
 
-      <IpListDataTable
-        isFetching={isFetching}
-        columns={columns}
-        data={data?.data ?? []}
-        currentPage={data?.current_page ?? 1}
-        lastPage={data?.last_page ?? 1}
-        total={data?.total ?? 0}
-        search={search}
-        onSearchChange={(val) => {
-          setSearch(val);
-          setPage(1);
-        }}
-        onPageChange={setPage}
-      />
-    </div>
+        <IpListDataTable
+          isFetching={isFetching}
+          columns={columns}
+          data={data?.data ?? []}
+          currentPage={data?.current_page ?? 1}
+          lastPage={data?.last_page ?? 1}
+          total={data?.total ?? 0}
+          search={search}
+          onSearchChange={(val) => {
+            setSearch(val);
+            setPage(1);
+          }}
+          onPageChange={setPage}
+        />
+      </div>
+    </>
   );
 }

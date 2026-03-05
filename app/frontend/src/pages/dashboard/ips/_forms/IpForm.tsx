@@ -81,176 +81,181 @@ export default function IpForm() {
   }
 
   return (
-    <div className="mx-auto max-w-xl space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">
-          {isEdit ? "Edit IP Address" : "Add IP Address"}
-        </h1>
-        <p className="text-muted-foreground">
-          {isEdit
-            ? "Update the label or comment for this IP address"
-            : "Register a new IP address"}
-        </p>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            {isEdit ? "Edit Details" : "IP Address Details"}
-          </CardTitle>
-          <CardDescription>
+    <>
+      <title>
+        {isEdit ? "Edit IP Address" : "Add IP Address"} - IP Address Manager
+      </title>
+      <div className="mx-auto max-w-xl space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">
+            {isEdit ? "Edit IP Address" : "Add IP Address"}
+          </h1>
+          <p className="text-muted-foreground">
             {isEdit
-              ? "Only the label and comment can be changed."
-              : "Enter the IP address along with a label and optional comment."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isEdit ? (
-            <form
-              id="ip-update-form"
-              onSubmit={updateForm.handleSubmit(handleUpdate)}
-              className="space-y-4"
-            >
-              {existing && (
-                <Field>
-                  <FieldLabel>IP Address</FieldLabel>
-                  <Input value={existing.ip_address} disabled />
+              ? "Update the label or comment for this IP address"
+              : "Register a new IP address"}
+          </p>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {isEdit ? "Edit Details" : "IP Address Details"}
+            </CardTitle>
+            <CardDescription>
+              {isEdit
+                ? "Only the label and comment can be changed."
+                : "Enter the IP address along with a label and optional comment."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isEdit ? (
+              <form
+                id="ip-update-form"
+                onSubmit={updateForm.handleSubmit(handleUpdate)}
+                className="space-y-4"
+              >
+                {existing && (
+                  <Field>
+                    <FieldLabel>IP Address</FieldLabel>
+                    <Input value={existing.ip_address} disabled />
+                  </Field>
+                )}
+                <FieldGroup>
+                  <Controller
+                    name="label"
+                    control={updateForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel>Label</FieldLabel>
+                        <Input
+                          {...field}
+                          placeholder="e.g. Production Server"
+                          aria-invalid={fieldState.invalid}
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name="comment"
+                    control={updateForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel>Comment (optional)</FieldLabel>
+                        <Input
+                          {...field}
+                          placeholder="Any additional notes..."
+                          aria-invalid={fieldState.invalid}
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                </FieldGroup>
+                <div className="flex gap-2">
+                  <Button
+                    type="submit"
+                    form="ip-update-form"
+                    disabled={isPending}
+                  >
+                    {isPending && <Spinner />}
+                    Save Changes
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => navigate("/ips")}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            ) : (
+              <form
+                id="ip-create-form"
+                onSubmit={createForm.handleSubmit(handleCreate)}
+                className="space-y-4"
+              >
+                <FieldGroup>
+                  <Controller
+                    name="ip_address"
+                    control={createForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel>IP Address</FieldLabel>
+                        <Input
+                          {...field}
+                          placeholder="e.g. 192.168.1.1 or 2001:db8::1"
+                          aria-invalid={fieldState.invalid}
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name="label"
+                    control={createForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel>Label</FieldLabel>
+                        <Input
+                          {...field}
+                          placeholder="e.g. Production Server"
+                          aria-invalid={fieldState.invalid}
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name="comment"
+                    control={createForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel>Comment (optional)</FieldLabel>
+                        <Input
+                          {...field}
+                          placeholder="Any additional notes..."
+                          aria-invalid={fieldState.invalid}
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                </FieldGroup>
+                <Field orientation={"horizontal"} className="justify-end gap-2">
+                  <Button
+                    type="submit"
+                    form="ip-create-form"
+                    disabled={isPending}
+                  >
+                    {isPending && <Spinner />}
+                    Add IP Address
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => navigate("/ips")}
+                  >
+                    Cancel
+                  </Button>
                 </Field>
-              )}
-              <FieldGroup>
-                <Controller
-                  name="label"
-                  control={updateForm.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Label</FieldLabel>
-                      <Input
-                        {...field}
-                        placeholder="e.g. Production Server"
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-                <Controller
-                  name="comment"
-                  control={updateForm.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Comment (optional)</FieldLabel>
-                      <Input
-                        {...field}
-                        placeholder="Any additional notes..."
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-              </FieldGroup>
-              <div className="flex gap-2">
-                <Button
-                  type="submit"
-                  form="ip-update-form"
-                  disabled={isPending}
-                >
-                  {isPending && <Spinner />}
-                  Save Changes
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate("/ips")}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          ) : (
-            <form
-              id="ip-create-form"
-              onSubmit={createForm.handleSubmit(handleCreate)}
-              className="space-y-4"
-            >
-              <FieldGroup>
-                <Controller
-                  name="ip_address"
-                  control={createForm.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>IP Address</FieldLabel>
-                      <Input
-                        {...field}
-                        placeholder="e.g. 192.168.1.1 or 2001:db8::1"
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-                <Controller
-                  name="label"
-                  control={createForm.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Label</FieldLabel>
-                      <Input
-                        {...field}
-                        placeholder="e.g. Production Server"
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-                <Controller
-                  name="comment"
-                  control={createForm.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Comment (optional)</FieldLabel>
-                      <Input
-                        {...field}
-                        placeholder="Any additional notes..."
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-              </FieldGroup>
-              <Field orientation={"horizontal"} className="justify-end gap-2">
-                <Button
-                  type="submit"
-                  form="ip-create-form"
-                  disabled={isPending}
-                >
-                  {isPending && <Spinner />}
-                  Add IP Address
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate("/ips")}
-                >
-                  Cancel
-                </Button>
-              </Field>
-            </form>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+              </form>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 }
