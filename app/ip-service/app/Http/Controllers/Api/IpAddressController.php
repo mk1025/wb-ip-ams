@@ -19,13 +19,41 @@ class IpAddressController extends Controller
 
     public function index(Request $request)
     {
-        $query = IpAddress::query()->orderBy('created_at', 'desc');
+        /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
+        $guard = auth('api');
+        $user = $guard->user();
+
+        $query = IpAddress::query();
 
         if ($request->filled('search')) {
-            $query->where('ip_address', 'like', '%'.$request->search.'%');
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('ip_address', 'like', '%'.$search.'%')
+                    ->orWhere('label', 'like', '%'.$search.'%');
+            });
         }
 
+        $ownership = $request->input('ownership', 'all');
+
+        if ($ownership === 'mine') {
+            $query->where('owner_id', $user->id);
+        } elseif ($ownership === 'others') {
+            $query->where('owner_id', '!=', $user->id);
+        }
+
+        $allowedSorts = ['ip_address', 'label', 'created_at'];
+
+        $sortBy = in_array($request->input('sort_by'), $allowedSorts)
+            ? $request->input('sort_by')
+            : 'created_at';
+
+        $sortDir = $request->input('sort_dir') === 'asc' ? 'asc' : 'desc';
+
+        $query->orderBy($sortBy, $sortDir);
+
         $ipAddresses = $query->paginate(15);
+
+        $ipAddresses->setPath('/api/ip-addresses');
 
         return $this->success(
             $ipAddresses->through(fn ($ip) => new IpAddressResource($ip))

@@ -19,10 +19,12 @@ class IpStatsController extends Controller
 
         $total = IpAddress::count();
         $mine = IpAddress::where('owner_id', $user->id)->count();
+        $others = IpAddress::where('owner_id', '!=', $user->id)->count();
 
         return $this->success([
             'total' => $total,
             'mine' => $mine,
+            'others' => $others,
         ]);
     }
 }

@@ -12,17 +12,41 @@ import {
 import { IP_ADDRESS_QUERY_KEYS } from "../keys/ip-address";
 import api from "@/lib/axios";
 
+export type OwnershipFilter = "all" | "mine" | "others";
+export interface GetIpAddressesParams {
+  page?: number;
+  search?: string;
+  ownership?: OwnershipFilter;
+  sortBy?: "ip_address" | "label" | "created_at";
+  sortDir?: "asc" | "desc";
+}
+
 export function useGetIpAddresses({
   page = 1,
   search = "",
-}): UseQueryResult<PaginatedResponse<IpAddressResource>, Error> {
+  ownership = "all",
+  sortBy = "created_at",
+  sortDir = "desc",
+}: GetIpAddressesParams): UseQueryResult<
+  PaginatedResponse<IpAddressResource>,
+  Error
+> {
   return useQuery({
-    queryKey: [...IP_ADDRESS_QUERY_KEYS.ALL, { page, search }],
+    queryKey: [
+      ...IP_ADDRESS_QUERY_KEYS.ALL,
+      { page, search, ownership, sortBy, sortDir },
+    ],
     queryFn: async () => {
       const response = await api.get<
         APIResponse<PaginatedResponse<IpAddressResource>>
       >(`/ip-addresses`, {
-        params: { page, ...(search ? { search } : {}) },
+        params: {
+          page,
+          sort_by: sortBy,
+          sort_dir: sortDir,
+          ...(search ? { search } : {}),
+          ...(ownership && ownership !== "all" ? { ownership } : {}),
+        },
       });
 
       if (!response.data.success || !response.data.data) {

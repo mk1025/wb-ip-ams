@@ -42,6 +42,8 @@ class IpAuditLogController extends Controller
 
         $logs = $query->paginate(10);
 
+        $logs->setPath('/api/audit/ip');
+
         return $this->success($logs);
     }
 }

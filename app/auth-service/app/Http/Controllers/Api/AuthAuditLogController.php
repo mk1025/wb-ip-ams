@@ -38,6 +38,8 @@ class AuthAuditLogController extends Controller
 
         $logs = $query->paginate(15);
 
+        $logs->setPath('/api/audit/auth');
+
         return $this->success($logs);
     }
 }

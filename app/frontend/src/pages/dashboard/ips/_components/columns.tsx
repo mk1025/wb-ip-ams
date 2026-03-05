@@ -9,7 +9,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontalIcon, PenIcon } from "lucide-react";
+import {
+  ArrowUpIcon,
+  ArrowDownIcon,
+  MoreHorizontalIcon,
+  PenIcon,
+  ArrowUpDownIcon,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { DeleteIpDialog } from "./dialogs/DeleteIpDialog";
 
@@ -25,14 +31,43 @@ export function IpListColumns({
   return [
     {
       accessorKey: "ip_address",
-      header: "IP Address",
+      enableSorting: true,
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          IP Address
+          {column.getIsSorted() === "asc" ? (
+            <ArrowUpIcon className="size-3.5" />
+          ) : column.getIsSorted() === "desc" ? (
+            <ArrowDownIcon className="size-3.5" />
+          ) : (
+            <ArrowUpDownIcon className="text-muted-foreground size-3.5" />
+          )}
+        </Button>
+      ),
       cell: ({ row }) => (
         <span className="font-mono">{row.getValue("ip_address")}</span>
       ),
     },
     {
       accessorKey: "label",
-      header: "Label",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Label
+          {column.getIsSorted() === "asc" ? (
+            <ArrowUpIcon className="size-3.5" />
+          ) : column.getIsSorted() === "desc" ? (
+            <ArrowDownIcon className="size-3.5" />
+          ) : (
+            <ArrowUpDownIcon className="text-muted-foreground size-3.5" />
+          )}
+        </Button>
+      ),
     },
     {
       accessorKey: "comment",
@@ -58,7 +93,22 @@ export function IpListColumns({
     },
     {
       accessorKey: "created_at",
-      header: "Created",
+      enableSorting: true,
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Created
+          {column.getIsSorted() === "asc" ? (
+            <ArrowUpIcon className="size-3.5" />
+          ) : column.getIsSorted() === "desc" ? (
+            <ArrowDownIcon className="size-3.5" />
+          ) : (
+            <ArrowUpDownIcon className="text-muted-foreground size-3.5" />
+          )}
+        </Button>
+      ),
       cell: ({ row }) => (
         <span className="text-muted-foreground">
           {new Date(row.getValue("created_at")).toLocaleString()}

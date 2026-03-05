@@ -7,10 +7,14 @@ import { useAuthStore } from "@/stores/auth-store";
 import { Navigate } from "react-router-dom";
 import AuthLogsTable from "./_components/AuthLogsTable";
 import IpLogsTable from "./_components/IpLogsTable";
-import { useState } from "react";
+import { useEffect, useId, useState } from "react";
+import { toast } from "sonner";
 
 export default function AuditLogPage() {
   const user = useAuthStore((state) => state.user);
+
+  const authToastId = useId();
+  const ipToastId = useId();
 
   const [authPage, setAuthPage] = useState(1);
   const [ipPage, setIpPage] = useState(1);
@@ -18,14 +22,69 @@ export default function AuditLogPage() {
   const {
     data: authLogs,
     isLoading: isLoadingAuth,
+    isFetching: isFetchingAuth,
     isError: isErrorAuth,
+    error: authError,
+    isSuccess: isSuccessAuth,
   } = useGetAuthAuditLogs(authPage);
 
   const {
     data: ipLogs,
     isLoading: isLoadingIp,
     isError: isErrorIp,
+    error: ipError,
+    isFetching: isFetchingIp,
+    isSuccess: isSuccessIp,
   } = useGetIpAuditLogs(ipPage);
+
+  useEffect(() => {
+    if (isErrorAuth) {
+      toast.error("Failed to load auth logs. Please try again.", {
+        id: authToastId,
+        description: authError instanceof Error ? authError.message : undefined,
+      });
+    } else if (isLoadingAuth) {
+      toast.loading("Loading auth logs...", {
+        id: authToastId,
+        description: undefined,
+      });
+    } else if (isFetchingAuth) {
+      toast.loading("Updating results...", {
+        id: authToastId,
+        description: undefined,
+      });
+    } else {
+      toast.dismiss(authToastId);
+    }
+  }, [
+    authToastId,
+    isLoadingAuth,
+    isFetchingAuth,
+    isErrorAuth,
+    authError,
+    isSuccessAuth,
+  ]);
+
+  useEffect(() => {
+    if (isErrorIp) {
+      toast.error("Failed to load IP logs. Please try again.", {
+        id: ipToastId,
+        description: ipError instanceof Error ? ipError.message : undefined,
+      });
+    } else if (isLoadingIp) {
+      toast.loading("Loading IP logs...", {
+        id: ipToastId,
+        description: undefined,
+      });
+    } else if (isFetchingIp) {
+      toast.loading("Updating results...", {
+        id: ipToastId,
+        description: undefined,
+      });
+    } else {
+      toast.dismiss(ipToastId);
+    }
+  }, [ipToastId, isLoadingIp, isFetchingIp, isErrorIp, ipError, isSuccessIp]);
 
   if (user?.role !== "super-admin") {
     return <Navigate to="/dashboard" replace />;
