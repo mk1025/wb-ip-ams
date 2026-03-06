@@ -1,8 +1,12 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import QueryState from "@/components/common/QueryState";
 import {
   useGetAuthAuditLogs,
   useGetIpAuditLogs,
+  type AuthAuditLogParams,
+  type IpAuditLogParams,
 } from "@/hooks/queries/audit-log";
+import { useDebounce } from "@/hooks/use-debounce";
 import { useAuthStore } from "@/stores/auth-store";
 import { Navigate } from "react-router-dom";
 import AuthLogsTable from "./_components/AuthLogsTable";
@@ -16,8 +20,26 @@ export default function AuditLogPage() {
   const authToastId = useId();
   const ipToastId = useId();
 
-  const [authPage, setAuthPage] = useState(1);
-  const [ipPage, setIpPage] = useState(1);
+  const [authFilter, setAuthFilter] = useState<AuthAuditLogParams>({ page: 1 });
+  const [ipFilter, setIpFilter] = useState<IpAuditLogParams>({ page: 1 });
+
+  const debouncedAuthText = useDebounce({
+    session_id: authFilter.session_id,
+    ip_address: authFilter.ip_address,
+  });
+  const authQueryFilter: AuthAuditLogParams = {
+    ...authFilter,
+    ...debouncedAuthText,
+  };
+
+  const debouncedIpText = useDebounce({
+    session_id: ipFilter.session_id,
+    ip_address: ipFilter.ip_address,
+  });
+  const ipQueryFilter: IpAuditLogParams = {
+    ...ipFilter,
+    ...debouncedIpText,
+  };
 
   const {
     data: authLogs,
@@ -25,8 +47,7 @@ export default function AuditLogPage() {
     isFetching: isFetchingAuth,
     isError: isErrorAuth,
     error: authError,
-    isSuccess: isSuccessAuth,
-  } = useGetAuthAuditLogs(authPage);
+  } = useGetAuthAuditLogs(authQueryFilter);
 
   const {
     data: ipLogs,
@@ -35,7 +56,7 @@ export default function AuditLogPage() {
     error: ipError,
     isFetching: isFetchingIp,
     isSuccess: isSuccessIp,
-  } = useGetIpAuditLogs(ipPage);
+  } = useGetIpAuditLogs(ipQueryFilter);
 
   useEffect(() => {
     if (isErrorAuth) {
@@ -56,14 +77,7 @@ export default function AuditLogPage() {
     } else {
       toast.dismiss(authToastId);
     }
-  }, [
-    authToastId,
-    isLoadingAuth,
-    isFetchingAuth,
-    isErrorAuth,
-    authError,
-    isSuccessAuth,
-  ]);
+  }, [authToastId, isLoadingAuth, isFetchingAuth, isErrorAuth, authError]);
 
   useEffect(() => {
     if (isErrorIp) {
@@ -108,27 +122,37 @@ export default function AuditLogPage() {
           </TabsList>
 
           <TabsContent value="auth" className="mt-4">
-            <AuthLogsTable
+            <QueryState
               isLoading={isLoadingAuth}
               isError={isErrorAuth}
-              data={authLogs?.data ?? []}
-              currentPage={authPage}
-              lastPage={authLogs?.last_page ?? 1}
-              total={authLogs?.total ?? 0}
-              onPageChange={(page) => setAuthPage(page)}
-            />
+              error={authError}
+            >
+              <AuthLogsTable
+                response={authLogs}
+                filter={authFilter}
+                isFetching={isFetchingAuth}
+                onFilterChange={(patch) =>
+                  setAuthFilter((prev) => ({ ...prev, ...patch }))
+                }
+              />
+            </QueryState>
           </TabsContent>
 
           <TabsContent value="ip" className="mt-4">
-            <IpLogsTable
+            <QueryState
               isLoading={isLoadingIp}
               isError={isErrorIp}
-              data={ipLogs?.data ?? []}
-              currentPage={ipPage}
-              lastPage={ipLogs?.last_page ?? 1}
-              total={ipLogs?.total ?? 0}
-              onPageChange={(page) => setIpPage(page)}
-            />
+              error={ipError}
+            >
+              <IpLogsTable
+                response={ipLogs}
+                filter={ipFilter}
+                isFetching={isFetchingIp}
+                onFilterChange={(patch) =>
+                  setIpFilter((prev) => ({ ...prev, ...patch }))
+                }
+              />
+            </QueryState>
           </TabsContent>
         </Tabs>
       </div>

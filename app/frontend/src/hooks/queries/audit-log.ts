@@ -5,24 +5,48 @@ import {
 } from "@tanstack/react-query";
 import type {
   APIResponse,
-  AuthAuditLogResource,
-  IpAuditLogResource,
-  PaginatedResponse,
+  AuthAuditLogsResponse,
+  IpAuditLogsResponse,
 } from "@wb-ip-ams/shared-types";
 import { AUDIT_LOG_QUERY_KEYS } from "../keys/audit-log";
 import api from "@/lib/axios";
 
+export type AuthAuditAction = "login" | "logout" | "token_refresh" | "register";
+export type IpAuditAction = "create" | "update" | "delete";
+
+export interface AuthAuditLogParams {
+  page?: number;
+  user_id?: string;
+  action?: AuthAuditAction;
+  ip_address?: string;
+  session_id?: string;
+  date_from?: string;
+  date_to?: string;
+}
+
+export interface IpAuditLogParams {
+  page?: number;
+  user_id?: string;
+  entity_id?: number;
+  action?: IpAuditAction;
+  ip_address?: string;
+  session_id?: string;
+  date_from?: string;
+  date_to?: string;
+}
+
 export function useGetAuthAuditLogs(
-  page = 1,
-): UseQueryResult<PaginatedResponse<AuthAuditLogResource>, Error> {
-  const queryKey = [...AUDIT_LOG_QUERY_KEYS.AUTH_LIST, page];
+  params: AuthAuditLogParams = {},
+): UseQueryResult<AuthAuditLogsResponse, Error> {
+  const queryKey = [...AUDIT_LOG_QUERY_KEYS.AUTH_LIST, params];
 
   return useQuery({
     queryKey,
     queryFn: async () => {
-      const response = await api.get<
-        APIResponse<PaginatedResponse<AuthAuditLogResource>>
-      >("/audit/auth", { params: { page } });
+      const response = await api.get<APIResponse<AuthAuditLogsResponse>>(
+        "/audit/auth",
+        { params },
+      );
 
       if (!response.data.success || !response.data.data) {
         throw new Error(
@@ -38,16 +62,17 @@ export function useGetAuthAuditLogs(
 }
 
 export function useGetIpAuditLogs(
-  page = 1,
-): UseQueryResult<PaginatedResponse<IpAuditLogResource>, Error> {
-  const queryKey = [...AUDIT_LOG_QUERY_KEYS.IP_LIST, page];
+  params: IpAuditLogParams = {},
+): UseQueryResult<IpAuditLogsResponse, Error> {
+  const queryKey = [...AUDIT_LOG_QUERY_KEYS.IP_LIST, params];
 
   return useQuery({
     queryKey,
     queryFn: async () => {
-      const response = await api.get<
-        APIResponse<PaginatedResponse<IpAuditLogResource>>
-      >("/audit/ip", { params: { page } });
+      const response = await api.get<APIResponse<IpAuditLogsResponse>>(
+        "/audit/ip",
+        { params },
+      );
 
       if (!response.data.success || !response.data.data) {
         throw new Error(

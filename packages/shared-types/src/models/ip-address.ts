@@ -1,3 +1,5 @@
+import type { PaginatedResponse } from "../common.types";
+
 // IP-ADDRESS
 
 export interface TableIpAddress {
@@ -13,6 +15,7 @@ export interface TableIpAddress {
 export interface TableIpAuditLog {
   id: number;
   user_id: number | null;
+  user_email: string | null;
   action: "create" | "update" | "delete";
   entity_type: string;
   entity_id: number;
@@ -29,6 +32,29 @@ export interface TableIpAuditLog {
 export interface IpAddressResource extends TableIpAddress {}
 
 export interface IpAuditLogResource extends TableIpAuditLog {}
+
+// AUDIT FILTER OPTIONS
+
+export interface IpAuditUserOption {
+  id: number;
+  email: string | null;
+  count: number;
+}
+
+export interface IpAuditActionOption {
+  value: string;
+  count: number;
+}
+
+// AUDIT LOG RESPONSE
+
+export interface IpAuditLogsResponse {
+  logs: PaginatedResponse<IpAuditLogResource>;
+  filter_options: {
+    users: IpAuditUserOption[];
+    actions: IpAuditActionOption[];
+  };
+}
 
 export interface IpStatsResource {
   total: number;

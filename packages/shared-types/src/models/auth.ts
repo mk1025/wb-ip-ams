@@ -1,3 +1,5 @@
+import type { PaginatedResponse } from "../common.types";
+
 // USER
 
 export interface TableUser {
@@ -52,4 +54,29 @@ export interface TokenResource {
   expires_in: number;
 }
 
-export interface AuthAuditLogResource extends TableAuditLogs {}
+export interface AuthAuditLogResource extends TableAuditLogs {
+  user_email: string | null;
+}
+
+// AUDIT FILTER OPTIONS
+
+export interface AuditUserOption {
+  id: number;
+  email: string;
+  count: number;
+}
+
+export interface AuditActionOption {
+  value: string;
+  count: number;
+}
+
+// AUDIT LOG RESPONSE
+
+export interface AuthAuditLogsResponse {
+  logs: PaginatedResponse<AuthAuditLogResource>;
+  filter_options: {
+    users: AuditUserOption[];
+    actions: AuditActionOption[];
+  };
+}
