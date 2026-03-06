@@ -47,111 +47,114 @@ export default function RegisterPage() {
   }
 
   return (
-    <Card className="w-full max-w-lg">
-      <CardHeader>
-        <CardTitle>Register</CardTitle>
-        <CardDescription>
-          Create a new account to access your dashboard
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form
-          id="register-form"
-          onSubmit={form.handleSubmit(handleRegister)}
-          className="space-y-4"
-        >
-          <FieldGroup>
-            <Controller
-              name="email"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Email</FieldLabel>
-                  <Input
-                    {...field}
-                    type="email"
-                    required
-                    aria-invalid={fieldState.invalid}
-                    placeholder="you@example.com"
-                    autoComplete="email"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Controller
-              name="password"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Password</FieldLabel>
-                  <Input
-                    {...field}
-                    type="password"
-                    required
-                    aria-invalid={fieldState.invalid}
-                    placeholder="Your password"
-                    autoComplete="new-password"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Controller
-              name="password_confirmation"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Confirm Password</FieldLabel>
-                  <Input
-                    {...field}
-                    type="password"
-                    required
-                    aria-invalid={fieldState.invalid}
-                    placeholder="Confirm your password"
-                    autoComplete="new-password"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-          </FieldGroup>
-        </form>
-      </CardContent>
-      <CardFooter>
-        <Field
-          orientation={"horizontal"}
-          className="flex w-full flex-wrap justify-between gap-2.5 md:flex-nowrap"
-        >
-          <div className="grid w-full grid-cols-2 justify-end gap-2.5 md:flex">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => form.reset()}
-            >
-              Reset
-            </Button>
-            <Button type="submit" form="register-form" disabled={isPending}>
-              {isPending && <Spinner />}
-              {isPending ? "Registering..." : "Register"}
-            </Button>
-          </div>
-          <div className="w-full justify-end md:order-first md:justify-start">
-            <p className="text-muted-foreground text-right text-sm md:text-left">
-              Already have an account?{" "}
-              <Link to="/login" className="text-primary hover:underline">
-                Login
-              </Link>
-            </p>
-          </div>
-        </Field>
-      </CardFooter>
-    </Card>
+    <>
+      <title>Register - IP Address Manager</title>
+      <Card className="w-full max-w-lg">
+        <CardHeader>
+          <CardTitle>Register</CardTitle>
+          <CardDescription>
+            Create a new account to access your dashboard
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form
+            id="register-form"
+            onSubmit={form.handleSubmit(handleRegister)}
+            className="space-y-4"
+          >
+            <FieldGroup>
+              <Controller
+                name="email"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>Email</FieldLabel>
+                    <Input
+                      {...field}
+                      type="email"
+                      required
+                      aria-invalid={fieldState.invalid}
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="password"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>Password</FieldLabel>
+                    <Input
+                      {...field}
+                      type="password"
+                      required
+                      aria-invalid={fieldState.invalid}
+                      placeholder="Your password"
+                      autoComplete="new-password"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="password_confirmation"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>Confirm Password</FieldLabel>
+                    <Input
+                      {...field}
+                      type="password"
+                      required
+                      aria-invalid={fieldState.invalid}
+                      placeholder="Confirm your password"
+                      autoComplete="new-password"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </FieldGroup>
+          </form>
+        </CardContent>
+        <CardFooter>
+          <Field
+            orientation={"horizontal"}
+            className="flex w-full flex-wrap justify-between gap-2.5 md:flex-nowrap"
+          >
+            <div className="grid w-full grid-cols-2 justify-end gap-2.5 md:flex">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => form.reset()}
+              >
+                Reset
+              </Button>
+              <Button type="submit" form="register-form" disabled={isPending}>
+                {isPending && <Spinner />}
+                {isPending ? "Registering..." : "Register"}
+              </Button>
+            </div>
+            <div className="w-full justify-end md:order-first md:justify-start">
+              <p className="text-muted-foreground text-right text-sm md:text-left">
+                Already have an account?{" "}
+                <Link to="/login" className="text-primary hover:underline">
+                  Login
+                </Link>
+              </p>
+            </div>
+          </Field>
+        </CardFooter>
+      </Card>
+    </>
   );
 }
