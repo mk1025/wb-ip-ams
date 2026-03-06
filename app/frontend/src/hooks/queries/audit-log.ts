@@ -1,4 +1,8 @@
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  type UseQueryResult,
+} from "@tanstack/react-query";
 import type {
   APIResponse,
   AuthAuditLogResource,
@@ -29,6 +33,7 @@ export function useGetAuthAuditLogs(
       return response.data.data;
     },
     staleTime: 30 * 1000,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -53,5 +58,6 @@ export function useGetIpAuditLogs(
       return response.data.data;
     },
     staleTime: 30 * 1000,
+    placeholderData: keepPreviousData,
   });
 }
