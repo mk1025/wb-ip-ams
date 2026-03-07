@@ -10,7 +10,6 @@ use App\Models\IpAddress;
 use App\Models\IpAuditLog;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class IpAddressController extends Controller
 {
@@ -65,14 +64,12 @@ class IpAddressController extends Controller
         $guard = auth('api');
         $user = $guard->user();
 
-
         $ipAddress = IpAddress::create([
             'ip_address' => $request->ip_address,
             'label' => $request->label,
             'comment' => $request->comment,
             'owner_id' => $user->id,
         ]);
-
 
         $this->logAudit($user->id, 'create', $ipAddress->id, null, $ipAddress->toArray(), $request);
 

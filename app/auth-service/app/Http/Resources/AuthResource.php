@@ -7,8 +7,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class AuthResource extends JsonResource
 {
-
     private $accessToken;
+
     private $refreshToken;
 
     public function __construct($user, $accessToken, $refreshToken)

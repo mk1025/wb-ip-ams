@@ -12,6 +12,7 @@ class GatewayController extends Controller
         $url = config('services.auth.url', 'http://localhost:8000').'/api';
         // Reconstruct the full path with 'auth' prefix
         $fullPath = 'auth/'.$path;
+
         return $this->forward($url, $fullPath, $request);
     }
 
@@ -20,6 +21,7 @@ class GatewayController extends Controller
         $url = config('services.ip.url', 'http://localhost:8001').'/api';
         // Reconstruct the full path with 'ip-addresses' prefix
         $fullPath = 'ip-addresses/'.$path;
+
         return $this->forward($url, $fullPath, $request);
     }
 

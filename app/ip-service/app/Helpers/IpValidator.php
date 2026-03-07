@@ -31,6 +31,7 @@ class IpValidator
         if (self::isIPv6($ip)) {
             return 6;
         }
+
         return null;
     }
 }

@@ -14,8 +14,8 @@ use App\Models\RefreshToken;
 use App\Models\User;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
@@ -50,7 +50,6 @@ class AuthController extends Controller
     public function login(LoginRequest $request)
     {
         $credentials = $request->only('email', 'password');
-
 
         // For some reason, it doesn't recognize the guard when using auth()->attempt(), so we need to specify it explicitly
         /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
@@ -96,9 +95,9 @@ class AuthController extends Controller
     {
         /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
         $guard = auth('api');
+
         return $this->success(new UserResource($guard->user()));
     }
-
 
     // Refresh access token using refresh token
     public function refresh(RefreshTokenRequest $request)

@@ -7,7 +7,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class TokenResource extends JsonResource
 {
-
     private $accessToken;
 
     public function __construct($accessToken)

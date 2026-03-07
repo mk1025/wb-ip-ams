@@ -9,16 +9,16 @@ use Symfony\Component\HttpFoundation\Response;
 
 class VerifyInternalSecret
 {
-  use ApiResponseTrait;
+    use ApiResponseTrait;
 
-  public function handle(Request $request, Closure $next): Response
-  {
-    $secret = config('app.internal_secret');
+    public function handle(Request $request, Closure $next): Response
+    {
+        $secret = config('app.internal_secret');
 
-    if (! $secret || $request->header('X-Internal-Secret') !== $secret) {
-      return $this->unauthorized();
+        if (! $secret || $request->header('X-Internal-Secret') !== $secret) {
+            return $this->unauthorized();
+        }
+
+        return $next($request);
     }
-
-    return $next($request);
-  }
 }

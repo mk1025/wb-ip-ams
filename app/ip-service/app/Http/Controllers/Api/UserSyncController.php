@@ -20,7 +20,7 @@ class UserSyncController extends Controller
             'role' => 'required|string|in:user,super-admin',
         ]);
 
-        $user = User::find($validated['id']) ?? new User();
+        $user = User::find($validated['id']) ?? new User;
         $user->id = $validated['id'];
         $user->fill([
             'email' => $validated['email'],

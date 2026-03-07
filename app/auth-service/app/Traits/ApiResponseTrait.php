@@ -6,7 +6,6 @@ use Illuminate\Http\JsonResponse;
 
 trait ApiResponseTrait
 {
-
     protected function success(mixed $data = null, ?string $message = null, int $statusCode = 200): JsonResponse
     {
         $response = ['success' => true];
@@ -22,12 +21,10 @@ trait ApiResponseTrait
         return response()->json($response, $statusCode);
     }
 
-
     protected function created(mixed $data = null, string $message = 'Resource created successfully'): JsonResponse
     {
         return $this->success($data, $message, 201);
     }
-
 
     protected function error(string $message, int $statusCode = 400, mixed $errors = null): JsonResponse
     {
@@ -43,7 +40,6 @@ trait ApiResponseTrait
         return response()->json($response, $statusCode);
     }
 
-
     protected function validationError(mixed $errors): JsonResponse
     {
         return response()->json([
@@ -52,18 +48,15 @@ trait ApiResponseTrait
         ], 422);
     }
 
-
     protected function unauthorized(string $message = 'Unauthorized'): JsonResponse
     {
         return $this->error($message, 401);
     }
 
-
     protected function forbidden(string $message = 'Forbidden'): JsonResponse
     {
         return $this->error($message, 403);
     }
-
 
     protected function notFound(string $message = 'Resource not found'): JsonResponse
     {
