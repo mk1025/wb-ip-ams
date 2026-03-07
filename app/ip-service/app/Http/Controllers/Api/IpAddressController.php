@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Helpers\IpValidator;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreIpAddressRequest;
 use App\Http\Requests\UpdateIpAddressRequest;
@@ -66,11 +65,6 @@ class IpAddressController extends Controller
         $guard = auth('api');
         $user = $guard->user();
 
-        if (! IpValidator::isValid($request->ip_address)) {
-            return $this->validationError([
-                'ip_address' => ['The IP address must be a valid IPv4 or IPv6 address.']
-            ]);
-        }
 
         $ipAddress = IpAddress::create([
             'ip_address' => $request->ip_address,

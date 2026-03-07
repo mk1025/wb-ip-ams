@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\IpValidator;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreIpAddressRequest extends FormRequest
@@ -14,19 +15,18 @@ class StoreIpAddressRequest extends FormRequest
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            //
             'ip_address' => [
                 'required',
                 'string',
                 'unique:ip_addresses,ip_address',
+                function (string $attribute, mixed $value, \Closure $fail) {
+                    if (! IpValidator::isValid($value)) {
+                        $fail('The IP address must be a valid IPv4 or IPv6 address.');
+                    }
+                },
             ],
             'label' => [
                 'required',
