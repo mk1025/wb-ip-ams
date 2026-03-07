@@ -14,9 +14,7 @@ trait ApiResponseTrait
             $response['message'] = $message;
         }
 
-        if ($data !== null) {
-            $response['data'] = $data;
-        }
+        $response['data'] = $data;
 
         return response()->json($response, $statusCode);
     }
