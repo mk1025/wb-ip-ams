@@ -18,6 +18,8 @@ import type { IpAuditLogsResponse } from "@wb-ip-ams/shared-types";
 import CustomTablePagination from "../../../../components/common/CustomTablePagination";
 import IpLogsTableFilters from "./IpLogsTableFilters";
 import { getIpActionColor } from "../util";
+import { Button } from "@/components/ui/button";
+import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon } from "lucide-react";
 
 export default function IpLogsTable({
   response,
@@ -41,6 +43,37 @@ export default function IpLogsTable({
     filter.date_from ||
     filter.date_to;
 
+  function sortHeader(
+    col: NonNullable<IpAuditLogParams["sortBy"]>,
+    label: string,
+  ) {
+    const isActive = filter.sortBy === col;
+    return (
+      <Button
+        variant="ghost"
+        onClick={() =>
+          onFilterChange?.({
+            sortBy: col,
+            sortDir: isActive && filter.sortDir === "asc" ? "desc" : "asc",
+            page: 1,
+          })
+        }
+        className="px-0!"
+      >
+        {label}
+        {isActive ? (
+          filter.sortDir === "asc" ? (
+            <ArrowUpIcon className="size-3.5" />
+          ) : (
+            <ArrowDownIcon className="size-3.5" />
+          )
+        ) : (
+          <ArrowUpDownIcon className="text-muted-foreground size-3.5" />
+        )}
+      </Button>
+    );
+  }
+
   return (
     <div className="space-y-3">
       <IpLogsTableFilters
@@ -57,12 +90,12 @@ export default function IpLogsTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Action</TableHead>
-              <TableHead>User</TableHead>
-              <TableHead>IP Record</TableHead>
+              <TableHead>{sortHeader("action", "Action")}</TableHead>
+              <TableHead>{sortHeader("user_id", "User")}</TableHead>
+              <TableHead>{sortHeader("entity_id", "IP Record")}</TableHead>
               <TableHead>Old Value</TableHead>
               <TableHead>New Value</TableHead>
-              <TableHead>Timestamp</TableHead>
+              <TableHead>{sortHeader("created_at", "Timestamp")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

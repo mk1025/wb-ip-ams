@@ -20,8 +20,16 @@ export default function AuditLogPage() {
   const authToastId = useId();
   const ipToastId = useId();
 
-  const [authFilter, setAuthFilter] = useState<AuthAuditLogParams>({ page: 1 });
-  const [ipFilter, setIpFilter] = useState<IpAuditLogParams>({ page: 1 });
+  const [authFilter, setAuthFilter] = useState<AuthAuditLogParams>({
+    page: 1,
+    sortBy: "created_at",
+    sortDir: "desc",
+  });
+  const [ipFilter, setIpFilter] = useState<IpAuditLogParams>({
+    page: 1,
+    sortBy: "created_at",
+    sortDir: "desc",
+  });
 
   const debouncedAuthText = useDebounce({
     ip_address: authFilter.ip_address,

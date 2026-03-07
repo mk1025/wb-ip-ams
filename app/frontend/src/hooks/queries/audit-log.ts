@@ -21,6 +21,8 @@ export interface AuthAuditLogParams {
   ip_address?: string;
   date_from?: string;
   date_to?: string;
+  sortBy?: "action" | "user_id" | "ip_address" | "created_at";
+  sortDir?: "asc" | "desc";
 }
 
 export interface IpAuditLogParams {
@@ -31,6 +33,8 @@ export interface IpAuditLogParams {
   ip_address?: string;
   date_from?: string;
   date_to?: string;
+  sortBy?: "action" | "user_id" | "entity_id" | "created_at";
+  sortDir?: "asc" | "desc";
 }
 
 export function useGetAuthAuditLogs(

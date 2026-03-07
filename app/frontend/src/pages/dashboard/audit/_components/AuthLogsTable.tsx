@@ -12,7 +12,9 @@ import CustomTablePagination from "../../../../components/common/CustomTablePagi
 import type { AuthAuditLogParams } from "@/hooks/queries/audit-log";
 import AuthLogsTableFilters from "./AuthLogsTableFilters";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { getAuthActionColor } from "../util";
+import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon } from "lucide-react";
 
 export default function AuthLogsTable({
   response,
@@ -31,6 +33,37 @@ export default function AuthLogsTable({
   const total = response?.logs.total ?? 0;
   const hasFilters = filter.user_id || filter.action;
 
+  function sortHeader(
+    col: NonNullable<AuthAuditLogParams["sortBy"]>,
+    label: string,
+  ) {
+    const isActive = filter.sortBy === col;
+    return (
+      <Button
+        variant="ghost"
+        onClick={() =>
+          onFilterChange?.({
+            sortBy: col,
+            sortDir: isActive && filter.sortDir === "asc" ? "desc" : "asc",
+            page: 1,
+          })
+        }
+        className="px-0!"
+      >
+        {label}
+        {isActive ? (
+          filter.sortDir === "asc" ? (
+            <ArrowUpIcon className="size-3.5" />
+          ) : (
+            <ArrowDownIcon className="size-3.5" />
+          )
+        ) : (
+          <ArrowUpDownIcon className="text-muted-foreground size-3.5" />
+        )}
+      </Button>
+    );
+  }
+
   return (
     <div className="space-y-3">
       <AuthLogsTableFilters
@@ -47,10 +80,10 @@ export default function AuthLogsTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Action</TableHead>
-              <TableHead>User</TableHead>
-              <TableHead>IP Address</TableHead>
-              <TableHead>Timestamp</TableHead>
+              <TableHead>{sortHeader("action", "Action")}</TableHead>
+              <TableHead>{sortHeader("user_id", "User")}</TableHead>
+              <TableHead>{sortHeader("ip_address", "IP Address")}</TableHead>
+              <TableHead>{sortHeader("created_at", "Timestamp")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

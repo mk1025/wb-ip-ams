@@ -23,7 +23,11 @@ class AuthAuditLogController extends Controller
             return $this->forbidden('Only super-admins can view audit logs');
         }
 
-        $query = AuthAuditLog::with('user:id,email')->orderBy('created_at', 'desc');
+        $allowed = ['action', 'user_id', 'ip_address', 'created_at'];
+        $sortBy = in_array($request->sortBy, $allowed) ? $request->sortBy : 'created_at';
+        $sortDir = $request->sortDir === 'asc' ? 'asc' : 'desc';
+
+        $query = AuthAuditLog::with('user:id,email')->orderBy($sortBy, $sortDir);
 
         if ($request->filled('user_id')) {
             $query->where('user_id', $request->user_id);

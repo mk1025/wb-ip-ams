@@ -23,7 +23,11 @@ class IpAuditLogController extends Controller
             return $this->forbidden('Only super-admins can view audit logs');
         }
 
-        $query = IpAuditLog::with('user:id,email')->orderBy('created_at', 'desc');
+        $allowed = ['action', 'user_id', 'entity_id', 'created_at'];
+        $sortBy = in_array($request->sortBy, $allowed) ? $request->sortBy : 'created_at';
+        $sortDir = $request->sortDir === 'asc' ? 'asc' : 'desc';
+
+        $query = IpAuditLog::with('user:id,email')->orderBy($sortBy, $sortDir);
 
         if ($request->filled('user_id')) {
             $query->where('user_id', $request->user_id);

@@ -37,6 +37,7 @@ export function IpListColumns({
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="px-0!"
         >
           IP Address
           {column.getIsSorted() === "asc" ? (
@@ -58,6 +59,7 @@ export function IpListColumns({
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="px-0!"
         >
           Label
           {column.getIsSorted() === "asc" ? (
@@ -106,6 +108,7 @@ export function IpListColumns({
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="px-0!"
         >
           Created
           {column.getIsSorted() === "asc" ? (
