@@ -87,7 +87,7 @@ class IpAddressController extends Controller
 
     public function show(Request $request, int $id)
     {
-        $ipAddress = IpAddress::find($id);
+        $ipAddress = IpAddress::with('owner')->find($id);
 
         if (! $ipAddress) {
             return $this->notFound('IP address not found');
