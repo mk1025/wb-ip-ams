@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\IpStatsController;
 use App\Http\Controllers\Api\UserSyncController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/internal/users/sync', [UserSyncController::class, 'sync']);
+Route::middleware('internal.secret')->post('/internal/users/sync', [UserSyncController::class, 'sync']);
 
 Route::middleware('auth:api')->prefix('ip-addresses')->group(function () {
     Route::get('/', [IpAddressController::class, 'index']);

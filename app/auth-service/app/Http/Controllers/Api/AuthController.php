@@ -150,12 +150,15 @@ class AuthController extends Controller
     {
         try {
             $url = config('services.ip.url', default: 'http://localhost:8001');
+            $secret = config('app.internal_secret');
 
-            Http::timeout(5)->post("{$url}/api/internal/users/sync", [
-                'id' => $user->id,
-                'email' => $user->email,
-                'role' => $user->role,
-            ]);
+            Http::timeout(5)
+                ->withHeaders(['X-Internal-Secret' => $secret])
+                ->post("{$url}/api/internal/users/sync", [
+                    'id' => $user->id,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                ]);
         } catch (\Exception $e) {
 
             \Log::warning('Failed to sync user to IP service: '.$e->getMessage());

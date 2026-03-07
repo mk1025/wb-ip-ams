@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'api/*',
         ]);
+        $middleware->alias([
+            'internal.secret' => \App\Http\Middleware\VerifyInternalSecret::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
