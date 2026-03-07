@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
@@ -124,13 +125,15 @@ class AuthController extends Controller
     // Create new refresh token for user and delete old ones
     private function createRefreshToken(User $user): RefreshToken
     {
-        RefreshToken::where('user_id', $user->id)->delete();
+        return DB::transaction(function () use ($user) {
+            RefreshToken::where('user_id', $user->id)->delete();
 
-        return RefreshToken::create([
-            'user_id' => $user->id,
-            'token' => Str::random(64),
-            'expires_at' => now()->addDays(30), // Refresh token valid for 30 days
-        ]);
+            return RefreshToken::create([
+                'user_id' => $user->id,
+                'token' => Str::random(64),
+                'expires_at' => now()->addDays(30),
+            ]);
+        });
     }
 
     // Log authentication events for auditing
