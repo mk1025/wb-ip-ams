@@ -115,7 +115,7 @@ class IpAddressController extends Controller
             'comment' => $request->comment,
         ]);
 
-        $this->logAudit($user->id, 'update', $ipAddress->id, $oldValues, $ipAddress->fresh()->toArray(), $request);
+        $this->logAudit($user->id, 'update', $ipAddress->id, $oldValues, $ipAddress->toArray(), $request);
 
         return $this->success(new IpAddressResource($ipAddress));
     }
