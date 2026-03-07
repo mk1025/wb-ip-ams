@@ -58,6 +58,7 @@ api.interceptors.response.use(
         });
 
         localStorage.setItem("access_token", data.data.access_token);
+        useAuthStore.getState().updateToken(data.data.access_token);
 
         originalRequest.headers.Authorization = `Bearer ${data.data.access_token}`;
         return api(originalRequest);
