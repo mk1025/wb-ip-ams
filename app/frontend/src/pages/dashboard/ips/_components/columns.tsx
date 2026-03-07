@@ -1,5 +1,6 @@
 import type { IpAddressResource } from "@wb-ip-ams/shared-types";
 import type { ColumnDef } from "@tanstack/react-table";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -79,13 +80,20 @@ export function IpListColumns({
       header: "Owner",
       cell: ({ row }) => {
         const isOwner = row.original.owner_id === currentUserId;
+        const ownerEmail = row.original.owner_email;
         return (
-          <span className="flex items-center gap-2">
-            {row.getValue("owner_id")}
+          <span className="text-muted-foreground inline-flex items-center gap-2.5 text-xs">
+            <Badge variant="ghost" className="font-mono text-xs">
+              #{row.getValue("owner_id")}
+            </Badge>
+            {ownerEmail ?? "—"}
             {isOwner && (
-              <span className="rounded bg-blue-100 px-1.5 py-0.5 text-xs text-blue-700">
+              <Badge
+                variant="ghost"
+                className="bg-blue-100 text-xs font-medium text-blue-700"
+              >
                 You
-              </span>
+              </Badge>
             )}
           </span>
         );

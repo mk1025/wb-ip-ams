@@ -49,7 +49,7 @@ class IpAddressController extends Controller
 
         $sortDir = $request->input('sort_dir') === 'asc' ? 'asc' : 'desc';
 
-        $query->orderBy($sortBy, $sortDir);
+        $query->orderBy($sortBy, $sortDir)->with('owner');
 
         $ipAddresses = $query->paginate(15);
 

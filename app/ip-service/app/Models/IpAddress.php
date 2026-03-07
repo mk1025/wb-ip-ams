@@ -19,6 +19,11 @@ class IpAddress extends Model
         'updated_at' => 'datetime',
     ];
 
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'owner_id');
+    }
+
     public function auditLogs()
     {
         return $this->hasMany(IpAuditLog::class, 'entity_id')

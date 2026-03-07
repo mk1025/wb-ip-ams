@@ -20,6 +20,7 @@ class IpAddressResource extends JsonResource
             'label' => $this->label,
             'comment' => $this->comment,
             'owner_id' => $this->owner_id,
+            'owner_email' => $this->owner?->email,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
         ];

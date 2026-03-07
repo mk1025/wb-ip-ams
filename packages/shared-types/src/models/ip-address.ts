@@ -8,6 +8,7 @@ export interface TableIpAddress {
   label: string;
   comment: string | null;
   owner_id: number;
+  owner_email: string | null;
   created_at: string;
   updated_at: string;
 }
