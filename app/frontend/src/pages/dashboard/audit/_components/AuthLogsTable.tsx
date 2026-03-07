@@ -80,7 +80,7 @@ export default function AuthLogsTable({
                     </Badge>
                   </TableCell>
                   <TableCell className="text-muted-foreground inline-flex items-center gap-2.5 text-xs">
-                    <span>#{log.id}</span>
+                    <span>#{log.user_id}</span>
                     <span className="text-xs">{log.user_email ?? "-"}</span>
                   </TableCell>
                   <TableCell className="font-mono text-xs">
