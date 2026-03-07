@@ -152,7 +152,6 @@ class IpAddressController extends Controller
         IpAuditLog::create([
             'user_id' => $userId,
             'action' => $action,
-            'entity_type' => 'ip_address',
             'entity_id' => $entityId,
             'old_value' => $oldValue,
             'new_value' => $newValue,

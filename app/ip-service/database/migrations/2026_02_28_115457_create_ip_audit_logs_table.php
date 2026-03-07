@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id')->nullable();
             $table->enum('action', ['create', 'update', 'delete']);
-            $table->string('entity_type')->default('ip_address');
             $table->unsignedBigInteger('entity_id');
             $table->json('old_value')->nullable();
             $table->json('new_value')->nullable();
@@ -25,7 +24,6 @@ return new class extends Migration
             $table->timestamp('created_at');
 
             $table->index('user_id');
-            $table->index('entity_type');
             $table->index('entity_id');
             $table->index('action');
             $table->index('created_at');

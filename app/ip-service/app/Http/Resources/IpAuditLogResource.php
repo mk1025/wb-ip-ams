@@ -19,7 +19,6 @@ class IpAuditLogResource extends JsonResource
             'user_id' => $this->user_id,
             'user_email' => $this->user?->email,
             'action' => $this->action,
-            'entity_type' => $this->entity_type,
             'entity_id' => $this->entity_id,
             'old_value' => $this->old_value,
             'new_value' => $this->new_value,

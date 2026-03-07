@@ -18,7 +18,6 @@ export interface TableIpAuditLog {
   user_id: number | null;
   user_email: string | null;
   action: "create" | "update" | "delete";
-  entity_type: string;
   entity_id: number;
   old_value: Record<any, any>; // json
   new_value: Record<any, any>; // json

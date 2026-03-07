@@ -12,7 +12,6 @@ class IpAuditLog extends Model
     protected $fillable = [
         'user_id',
         'action',
-        'entity_type',
         'entity_id',
         'old_value',
         'new_value',

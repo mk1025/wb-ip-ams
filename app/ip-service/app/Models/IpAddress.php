@@ -26,7 +26,6 @@ class IpAddress extends Model
 
     public function auditLogs()
     {
-        return $this->hasMany(IpAuditLog::class, 'entity_id')
-            ->where('entity_type', 'ip_address');
+        return $this->hasMany(IpAuditLog::class, 'entity_id');
     }
 }
