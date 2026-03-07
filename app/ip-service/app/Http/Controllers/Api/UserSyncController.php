@@ -20,14 +20,16 @@ class UserSyncController extends Controller
             'role' => 'required|string|in:user,super-admin',
         ]);
 
-        $user = User::updateOrCreate(
-            ['id' => $validated['id']],
-            [
-                'email' => $validated['email'],
-                'role' => $validated['role'],
-                'password' => bcrypt('not-used'),
-            ]
-        );
+        $user = User::find($validated['id']) ?? new User();
+        $user->id = $validated['id'];
+        $user->fill([
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+        ]);
+        if (! $user->exists) {
+            $user->password = bcrypt('not-used');
+        }
+        $user->save();
 
         return $this->success($user, 'User synced successfully');
     }
