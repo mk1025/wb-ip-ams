@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('refresh_tokens', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('token', 500)->unique();
+            $table->string('token', 64)->unique();
             $table->timestamp('expires_at');
             $table->timestamps();
 
