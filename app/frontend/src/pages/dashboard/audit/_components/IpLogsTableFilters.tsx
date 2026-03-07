@@ -44,7 +44,6 @@ export default function IpLogsTableFilters({
     filter.user_id ||
     filter.action ||
     filter.ip_address ||
-    filter.session_id ||
     filter.date_from ||
     filter.date_to;
 
@@ -131,24 +130,6 @@ export default function IpLogsTableFilters({
           }
         />
       </InputGroup>
-      <InputGroup className="max-w-52">
-        <InputGroupAddon>
-          <SearchIcon />
-        </InputGroupAddon>
-        <InputGroupInput
-          placeholder="Search Session ID..."
-          type="search"
-          className="font-mono text-xs"
-          data-slot="input-group-control"
-          value={filter.session_id ?? ""}
-          onChange={(e) =>
-            onFilterChange?.({
-              session_id: e.target.value || undefined,
-              page: 1,
-            })
-          }
-        />
-      </InputGroup>
       <Popover>
         <PopoverTrigger asChild>
           <Button
@@ -204,7 +185,6 @@ export default function IpLogsTableFilters({
               user_id: undefined,
               action: undefined,
               ip_address: undefined,
-              session_id: undefined,
               date_from: undefined,
               date_to: undefined,
               page: 1,

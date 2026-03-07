@@ -24,7 +24,6 @@ export default function AuditLogPage() {
   const [ipFilter, setIpFilter] = useState<IpAuditLogParams>({ page: 1 });
 
   const debouncedAuthText = useDebounce({
-    session_id: authFilter.session_id,
     ip_address: authFilter.ip_address,
   });
   const authQueryFilter: AuthAuditLogParams = {
@@ -33,7 +32,6 @@ export default function AuditLogPage() {
   };
 
   const debouncedIpText = useDebounce({
-    session_id: ipFilter.session_id,
     ip_address: ipFilter.ip_address,
   });
   const ipQueryFilter: IpAuditLogParams = {

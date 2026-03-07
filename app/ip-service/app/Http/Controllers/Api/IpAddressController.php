@@ -161,7 +161,7 @@ class IpAddressController extends Controller
             'new_value' => $newValue,
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
-            'session_id' => session()->getId(),
+            'session_id' => null,
             'created_at' => now(),
         ]);
     }

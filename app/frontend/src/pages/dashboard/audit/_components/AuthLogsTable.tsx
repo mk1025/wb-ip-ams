@@ -29,7 +29,7 @@ export default function AuthLogsTable({
   const currentPage = response?.logs.current_page ?? 1;
   const lastPage = response?.logs.last_page ?? 1;
   const total = response?.logs.total ?? 0;
-  const hasFilters = filter.user_id || filter.action || filter.session_id;
+  const hasFilters = filter.user_id || filter.action;
 
   return (
     <div className="space-y-3">
@@ -50,7 +50,6 @@ export default function AuthLogsTable({
               <TableHead>Action</TableHead>
               <TableHead>User</TableHead>
               <TableHead>IP Address</TableHead>
-              <TableHead>Session ID</TableHead>
               <TableHead>Timestamp</TableHead>
             </TableRow>
           </TableHeader>
@@ -58,7 +57,7 @@ export default function AuthLogsTable({
             {data.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={4}
                   className="text-muted-foreground h-24 text-center"
                 >
                   {hasFilters
@@ -85,9 +84,6 @@ export default function AuthLogsTable({
                   </TableCell>
                   <TableCell className="font-mono text-xs">
                     {log.ip_address ?? "—"}
-                  </TableCell>
-                  <TableCell className="max-w-50 truncate font-mono text-xs">
-                    {log.session_id ?? "—"}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {new Date(log.created_at).toLocaleString()}

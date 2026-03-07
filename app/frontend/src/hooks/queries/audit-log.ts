@@ -19,7 +19,6 @@ export interface AuthAuditLogParams {
   user_id?: string;
   action?: AuthAuditAction;
   ip_address?: string;
-  session_id?: string;
   date_from?: string;
   date_to?: string;
 }
@@ -30,7 +29,6 @@ export interface IpAuditLogParams {
   entity_id?: number;
   action?: IpAuditAction;
   ip_address?: string;
-  session_id?: string;
   date_from?: string;
   date_to?: string;
 }

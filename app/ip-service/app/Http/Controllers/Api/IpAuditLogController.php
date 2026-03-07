@@ -41,10 +41,6 @@ class IpAuditLogController extends Controller
             $query->where('ip_address', 'like', '%'.$request->ip_address.'%');
         }
 
-        if ($request->filled('session_id')) {
-            $query->where('session_id', $request->session_id);
-        }
-
         if ($request->filled('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
         }

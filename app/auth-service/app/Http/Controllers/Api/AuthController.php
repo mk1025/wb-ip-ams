@@ -144,7 +144,7 @@ class AuthController extends Controller
             'action' => $action,
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
-            'session_id' => session()->getId(),
+            'session_id' => null,
             'created_at' => now(),
         ]);
     }

@@ -38,7 +38,6 @@ export default function IpLogsTable({
     filter.user_id ||
     filter.action ||
     filter.ip_address ||
-    filter.session_id ||
     filter.date_from ||
     filter.date_to;
 
@@ -63,7 +62,6 @@ export default function IpLogsTable({
               <TableHead>IP Record</TableHead>
               <TableHead>Old Value</TableHead>
               <TableHead>New Value</TableHead>
-              <TableHead>Session ID</TableHead>
               <TableHead>Timestamp</TableHead>
             </TableRow>
           </TableHeader>
@@ -71,7 +69,7 @@ export default function IpLogsTable({
             {data.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={7}
+                  colSpan={6}
                   className="text-muted-foreground h-24 text-center"
                 >
                   {hasFilters
@@ -114,9 +112,6 @@ export default function IpLogsTable({
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
                     <IpValueCell value={log.new_value} />
-                  </TableCell>
-                  <TableCell className="max-w-50 truncate font-mono text-xs">
-                    {log.session_id ?? "—"}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {new Date(log.created_at).toLocaleString()}
