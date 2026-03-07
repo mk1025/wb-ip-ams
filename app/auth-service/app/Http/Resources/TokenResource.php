@@ -24,7 +24,7 @@ class TokenResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'access_token' => $this->access_token,
+            'access_token' => $this->accessToken,
             'token_type' => 'bearer',
             'expires_in' => config('jwt.ttl') * 60,
         ];
