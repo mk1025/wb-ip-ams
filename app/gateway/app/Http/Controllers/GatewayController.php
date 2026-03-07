@@ -30,7 +30,8 @@ class GatewayController extends Controller
         $url = $baseUrl.'/'.$path;
         $method = strtolower($request->method());
 
-        $httpRequest = Http::withHeaders($this->getForwardHeaders($request));
+        $httpRequest = Http::withoutRedirecting()
+            ->withHeaders($this->getForwardHeaders($request));
 
         $httpRequest = $httpRequest->timeout(30);
 
