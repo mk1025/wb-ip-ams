@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\IpAuditLogResource;
 use App\Models\IpAuditLog;
 use App\Traits\ApiResponseTrait;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -16,7 +17,7 @@ class IpAuditLogController extends Controller
     //
     use ApiResponseTrait;
 
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
         $guard = auth('api');
@@ -67,10 +68,11 @@ class IpAuditLogController extends Controller
             ->map(fn ($row) => [
                 'id' => $row->user_id,
                 'email' => $row->user?->email,
-                'count' => (int) $row->count,
+                'count' => (int) $row->getAttribute('count'),
             ])
             ->filter(fn ($u) => ! is_null($u['email']))
-            ->values());
+            ->values()
+            ->toArray());
 
         $actionOptions = Cache::remember('ip_audit_action_options', 60, fn () => IpAuditLog::selectRaw('action, count(*) as count')
             ->groupBy('action')
@@ -78,8 +80,9 @@ class IpAuditLogController extends Controller
             ->get()
             ->map(fn ($row) => [
                 'value' => $row->action,
-                'count' => (int) $row->count,
-            ]));
+                'count' => (int) $row->getAttribute('count'),
+            ])
+            ->toArray());
 
         $response = [
             'logs' => $logs->through(fn ($log) => new IpAuditLogResource($log)),

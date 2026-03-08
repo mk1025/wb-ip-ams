@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Http;
 
 class GatewayController extends Controller
 {
-    public function forwardToAuth(Request $request, string $path = '')
+    public function forwardToAuth(Request $request, string $path = ''): Response|JsonResponse
     {
         $url = config('services.auth.url', 'http://localhost:8000').'/api';
         // Reconstruct the full path with 'auth' prefix
@@ -19,7 +21,7 @@ class GatewayController extends Controller
         return $this->forward($url, $fullPath, $request);
     }
 
-    public function forwardToIp(Request $request, string $path = '')
+    public function forwardToIp(Request $request, string $path = ''): Response|JsonResponse
     {
         $url = config('services.ip.url', 'http://localhost:8001').'/api';
         // Reconstruct the full path with 'ip-addresses' prefix
@@ -28,7 +30,7 @@ class GatewayController extends Controller
         return $this->forward($url, $fullPath, $request);
     }
 
-    private function forward(string $baseUrl, string $path, Request $request)
+    private function forward(string $baseUrl, string $path, Request $request): Response|JsonResponse
     {
         // Remove trailing slash from path if present
         $path = rtrim($path, '/');
@@ -58,10 +60,11 @@ class GatewayController extends Controller
 
         return response($response->body(), $response->status())
             ->withHeaders([
-                'Content-Type' => $response->header('Content-Type') ?? 'application/json',
+                'Content-Type' => $response->header('Content-Type') ?: 'application/json',
             ]);
     }
 
+    /** @return array<string, string> */
     private function getForwardHeaders(Request $request): array
     {
         $headers = [
@@ -70,15 +73,15 @@ class GatewayController extends Controller
             'X-Forwarded-Host' => $request->getHost(),
             'X-Forwarded-Proto' => $request->getScheme(),
             'X-Forwarded-Port' => (string) $request->getPort(),
-            'X-Forwarded-For' => $request->ip(),
+            'X-Forwarded-For' => (string) $request->ip(),
         ];
 
         if ($request->hasHeader('Authorization')) {
-            $headers['Authorization'] = $request->header('Authorization');
+            $headers['Authorization'] = (string) $request->header('Authorization');
         }
 
         if ($request->hasHeader('X-Requested-With')) {
-            $headers['X-Requested-With'] = $request->header('X-Requested-With');
+            $headers['X-Requested-With'] = (string) $request->header('X-Requested-With');
         }
 
         return $headers;

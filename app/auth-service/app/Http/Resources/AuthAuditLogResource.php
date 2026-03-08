@@ -7,6 +7,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/** @mixin \App\Models\AuthAuditLog */
 class AuthAuditLogResource extends JsonResource
 {
     /**
@@ -24,7 +25,7 @@ class AuthAuditLogResource extends JsonResource
             'ip_address' => $this->ip_address,
             'user_agent' => $this->user_agent,
             'session_id' => $this->session_id,
-            'created_at' => $this->created_at?->toISOString(),
+            'created_at' => $this->created_at->toISOString(),
         ];
     }
 }

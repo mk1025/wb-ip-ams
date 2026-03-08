@@ -15,6 +15,7 @@ use App\Models\AuthAuditLog;
 use App\Models\RefreshToken;
 use App\Models\User;
 use App\Traits\ApiResponseTrait;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -27,7 +28,7 @@ class AuthController extends Controller
     use ApiResponseTrait;
 
     // Register new user
-    public function register(RegisterRequest $request)
+    public function register(RegisterRequest $request): JsonResponse
     {
         $user = User::create([
             'email' => $request->email,
@@ -49,7 +50,7 @@ class AuthController extends Controller
     }
 
     // Login user
-    public function login(LoginRequest $request)
+    public function login(LoginRequest $request): JsonResponse
     {
         $credentials = $request->only('email', 'password');
 
@@ -77,7 +78,7 @@ class AuthController extends Controller
     }
 
     // Logout user
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse
     {
         /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
         $guard = auth('api');
@@ -93,7 +94,7 @@ class AuthController extends Controller
     }
 
     // Get authenticated user
-    public function me()
+    public function me(): JsonResponse
     {
         /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
         $guard = auth('api');
@@ -102,7 +103,7 @@ class AuthController extends Controller
     }
 
     // Refresh access token using refresh token
-    public function refresh(RefreshTokenRequest $request)
+    public function refresh(RefreshTokenRequest $request): JsonResponse
     {
         $refreshToken = RefreshToken::where('token', $request->refresh_token)->first();
 
@@ -111,6 +112,10 @@ class AuthController extends Controller
         }
 
         $user = $refreshToken->user;
+
+        if (! $user) {
+            return $this->unauthorized('User not found');
+        }
 
         $newAccessToken = JWTAuth::fromUser($user);
 
@@ -150,7 +155,7 @@ class AuthController extends Controller
         ]);
     }
 
-    private function syncUserToIpService($user)
+    private function syncUserToIpService(User $user): void
     {
         try {
             $url = config('services.ip.url', default: 'http://localhost:8001');

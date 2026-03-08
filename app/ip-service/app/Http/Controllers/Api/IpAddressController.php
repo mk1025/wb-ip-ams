@@ -11,13 +11,14 @@ use App\Http\Resources\IpAddressResource;
 use App\Models\IpAddress;
 use App\Models\IpAuditLog;
 use App\Traits\ApiResponseTrait;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class IpAddressController extends Controller
 {
     use ApiResponseTrait;
 
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
         $guard = auth('api');
@@ -73,7 +74,7 @@ class IpAddressController extends Controller
             ->map(fn ($row) => [
                 'id' => $row->owner_id,
                 'email' => $row->owner?->email,
-                'count' => (int) $row->count,
+                'count' => (int) $row->getAttribute('count'),
             ])
             ->filter(fn ($o) => ! is_null($o['email']))
             ->values();
@@ -86,7 +87,7 @@ class IpAddressController extends Controller
         ]);
     }
 
-    public function store(StoreIpAddressRequest $request)
+    public function store(StoreIpAddressRequest $request): JsonResponse
     {
         /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
         $guard = auth('api');
@@ -106,7 +107,7 @@ class IpAddressController extends Controller
         return $this->created(new IpAddressResource($ipAddress));
     }
 
-    public function show(Request $request, int $id)
+    public function show(Request $request, int $id): JsonResponse
     {
         $ipAddress = IpAddress::with('owner')->find($id);
 
@@ -117,7 +118,7 @@ class IpAddressController extends Controller
         return $this->success(new IpAddressResource($ipAddress));
     }
 
-    public function update(UpdateIpAddressRequest $request, int $id)
+    public function update(UpdateIpAddressRequest $request, int $id): JsonResponse
     {
         /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
         $guard = auth('api');
@@ -149,7 +150,7 @@ class IpAddressController extends Controller
         return $this->success(new IpAddressResource($ipAddress));
     }
 
-    public function destroy(Request $request, int $id)
+    public function destroy(Request $request, int $id): JsonResponse
     {
 
         /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
@@ -179,6 +180,10 @@ class IpAddressController extends Controller
 
     // PRIVATES
 
+    /**
+     * @param  array<string, mixed>|null  $oldValue
+     * @param  array<string, mixed>|null  $newValue
+     */
     private function logAudit(int $userId, string $action, int $entityId, ?array $oldValue, ?array $newValue, Request $request): void
     {
         IpAuditLog::create([

@@ -11,6 +11,7 @@ use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
+    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     protected $fillable = [
@@ -25,12 +26,13 @@ class User extends Authenticatable implements JWTSubject
 
     // JWT
 
-    public function getJWTIdentifier()
+    public function getJWTIdentifier(): mixed
     {
         return $this->getKey();
     }
 
-    public function getJWTCustomClaims()
+    /** @return array<string, mixed> */
+    public function getJWTCustomClaims(): array
     {
         return [
             'role' => $this->role,

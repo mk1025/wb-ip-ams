@@ -9,9 +9,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class TokenResource extends JsonResource
 {
-    private $accessToken;
+    private string $accessToken;
 
-    public function __construct($accessToken)
+    public function __construct(string $accessToken)
     {
         parent::__construct(null);
         $this->accessToken = $accessToken;

@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Traits\ApiResponseTrait;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class UserSyncController extends Controller
@@ -14,7 +15,7 @@ class UserSyncController extends Controller
     //
     use ApiResponseTrait;
 
-    public function sync(Request $request)
+    public function sync(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'id' => 'required|integer',

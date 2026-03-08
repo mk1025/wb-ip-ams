@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\Api\IpAddressController;
 use App\Http\Controllers\Api\IpAuditLogController;
 use App\Http\Controllers\Api\IpStatsController;

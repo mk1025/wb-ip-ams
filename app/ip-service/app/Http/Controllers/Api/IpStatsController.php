@@ -7,13 +7,14 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\IpAddress;
 use App\Traits\ApiResponseTrait;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class IpStatsController extends Controller
 {
     use ApiResponseTrait;
 
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
         $guard = auth('api');
@@ -25,9 +26,9 @@ class IpStatsController extends Controller
         )->first();
 
         return $this->success([
-            'total' => (int) $stats->total,
-            'mine' => (int) $stats->mine,
-            'others' => (int) $stats->others,
+            'total' => (int) $stats?->getAttribute('total'),
+            'mine' => (int) $stats?->getAttribute('mine'),
+            'others' => (int) $stats?->getAttribute('others'),
         ]);
     }
 }

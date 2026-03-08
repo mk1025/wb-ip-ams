@@ -10,6 +10,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
+/**
+ * @property string $role
+ */
 class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -50,12 +53,13 @@ class User extends Authenticatable implements JWTSubject
 
     // JWT
 
-    public function getJWTIdentifier()
+    public function getJWTIdentifier(): mixed
     {
         return $this->getKey();
     }
 
-    public function getJWTCustomClaims()
+    /** @return array<string, mixed> */
+    public function getJWTCustomClaims(): array
     {
         return [
             'role' => $this->role,

@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AuthResource extends JsonResource
 {
-    private $accessToken;
+    private string $accessToken;
 
-    private $refreshToken;
+    private string $refreshToken;
 
-    public function __construct($user, $accessToken, $refreshToken)
+    public function __construct(User $user, string $accessToken, string $refreshToken)
     {
         parent::__construct($user);
         $this->accessToken = $accessToken;

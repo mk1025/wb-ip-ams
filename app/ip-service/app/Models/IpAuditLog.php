@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class IpAuditLog extends Model
 {
@@ -29,12 +30,13 @@ class IpAuditLog extends Model
         'created_at' => 'datetime',
     ];
 
-    public function user()
+    /** @return BelongsTo<User, $this> */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function save(array $options = [])
+    public function save(array $options = []): bool
     {
         if ($this->exists) {
             return false;
@@ -43,7 +45,7 @@ class IpAuditLog extends Model
         return parent::save($options);
     }
 
-    public function delete()
+    public function delete(): bool
     {
         return false;
     }

@@ -6,6 +6,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
@@ -49,24 +50,27 @@ class User extends Authenticatable implements JWTSubject
         ];
     }
 
-    public function refreshTokens()
+    /** @return HasMany<RefreshToken, $this> */
+    public function refreshTokens(): HasMany
     {
         return $this->hasMany(RefreshToken::class);
     }
 
-    public function authAuditLogs()
+    /** @return HasMany<AuthAuditLog, $this> */
+    public function authAuditLogs(): HasMany
     {
         return $this->hasMany(AuthAuditLog::class);
     }
 
     // JWT
 
-    public function getJWTIdentifier()
+    public function getJWTIdentifier(): mixed
     {
         return $this->getKey();
     }
 
-    public function getJWTCustomClaims()
+    /** @return array<string, mixed> */
+    public function getJWTCustomClaims(): array
     {
         return [
             'role' => $this->role,
