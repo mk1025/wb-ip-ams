@@ -14,6 +14,5 @@ Route::middleware('throttle:api')->group(function () {
         ->where('path', '.*');
 
     Route::any('/audit/auth', fn (Request $r) => app(GatewayController::class)->forwardToAuth($r, 'audit-logs'));
+    Route::any('/audit/ip', fn (Request $r) => app(GatewayController::class)->forwardToIp($r, 'audit-logs'));
 });
-
-Route::any('/audit/ip', fn (Request $r) => app(GatewayController::class)->forwardToIp($r, 'audit-logs'));
