@@ -62,8 +62,6 @@ class IpAddressController extends Controller
 
         $ipAddresses = $query->paginate(15);
 
-        $ipAddresses->setPath('/api/ip-addresses');
-
         $ownerOptions = IpAddress::with('owner:id,email')
             ->select('owner_id')
             ->selectRaw('count(*) as count')

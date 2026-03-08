@@ -65,6 +65,10 @@ class GatewayController extends Controller
         $headers = [
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
+            'X-Forwarded-Host' => $request->getHost(),
+            'X-Forwarded-Proto' => $request->getScheme(),
+            'X-Forwarded-Port' => (string) $request->getPort(),
+            'X-Forwarded-For' => $request->ip(),
         ];
 
         if ($request->hasHeader('Authorization')) {

@@ -55,8 +55,6 @@ class IpAuditLogController extends Controller
 
         $logs = $query->paginate(10);
 
-        $logs->setPath('/api/audit/ip');
-
         $userOptions = IpAuditLog::with('user:id,email')
             ->selectRaw('user_id, count(*) as count')
             ->whereNotNull('user_id')

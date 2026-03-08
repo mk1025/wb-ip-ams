@@ -51,8 +51,6 @@ class AuthAuditLogController extends Controller
 
         $logs = $query->paginate(15);
 
-        $logs->setPath('/api/audit/auth');
-
         $userOptions = AuthAuditLog::with('user:id,email')
             ->selectRaw('user_id, count(*) as count')
             ->whereNotNull('user_id')
