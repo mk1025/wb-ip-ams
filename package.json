@@ -4,6 +4,11 @@
   "description": "Web-Based IP Address Management System",
   "private": true,
   "main": "index.js",
+  "engines": {
+    "node": ">=22.15.0",
+    "pnpm": ">=10.30.0",
+    "npm": ">=11.7.0"
+  },
   "directories": {
     "doc": "docs"
   },
