@@ -99,11 +99,12 @@ export default function IpListPage() {
         <IpListDataTable
           isFetching={isFetching}
           columns={columns}
-          data={data?.data ?? []}
-          currentPage={data?.current_page ?? 1}
-          lastPage={data?.last_page ?? 1}
-          total={data?.total ?? 0}
+          data={data?.items.data ?? []}
+          currentPage={data?.items.current_page ?? 1}
+          lastPage={data?.items.last_page ?? 1}
+          total={data?.items.total ?? 0}
           filter={filter}
+          filterOptions={data?.filter_options}
           onFilterChange={(patch) =>
             setFilter((prev) => ({ ...prev, ...patch }))
           }

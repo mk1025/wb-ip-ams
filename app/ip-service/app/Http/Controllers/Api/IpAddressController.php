@@ -31,12 +31,23 @@ class IpAddressController extends Controller
             });
         }
 
-        $ownership = $request->input('ownership', 'all');
+        if ($request->filled('owner_id')) {
+            $query->where('owner_id', $request->owner_id);
+        } else {
+            $ownership = $request->input('ownership', 'all');
+            if ($ownership === 'mine') {
+                $query->where('owner_id', $user->id);
+            } elseif ($ownership === 'others') {
+                $query->where('owner_id', '!=', $user->id);
+            }
+        }
 
-        if ($ownership === 'mine') {
-            $query->where('owner_id', $user->id);
-        } elseif ($ownership === 'others') {
-            $query->where('owner_id', '!=', $user->id);
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
         }
 
         $allowedSorts = ['ip_address', 'label', 'created_at'];
@@ -53,9 +64,26 @@ class IpAddressController extends Controller
 
         $ipAddresses->setPath('/api/ip-addresses');
 
-        return $this->success(
-            $ipAddresses->through(fn ($ip) => new IpAddressResource($ip))
-        );
+        $ownerOptions = IpAddress::with('owner:id,email')
+            ->select('owner_id')
+            ->selectRaw('count(*) as count')
+            ->groupBy('owner_id')
+            ->orderByDesc('count')
+            ->get()
+            ->map(fn ($row) => [
+                'id' => $row->owner_id,
+                'email' => $row->owner?->email,
+                'count' => (int) $row->count,
+            ])
+            ->filter(fn ($o) => ! is_null($o['email']))
+            ->values();
+
+        return $this->success([
+            'items' => $ipAddresses->through(fn ($ip) => new IpAddressResource($ip)),
+            'filter_options' => [
+                'owners' => $ownerOptions,
+            ],
+        ]);
     }
 
     public function store(StoreIpAddressRequest $request)

@@ -15,26 +15,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import CustomTablePagination from "@/components/common/CustomTablePagination";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
-import {
-  SearchIcon,
-  UserLockIcon,
-  UserSearchIcon,
-  UsersIcon,
-  XIcon,
-} from "lucide-react";
-import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
-import type {
-  GetIpAddressesParams,
-  OwnershipFilter,
-} from "@/hooks/queries/ip-address";
-import { Button } from "@/components/ui/button";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import type { GetIpAddressesParams } from "@/hooks/queries/ip-address";
+import type { IpAddressesResponse } from "@wb-ip-ams/shared-types";
+import IpListTableFilters from "./IpListTableFilters";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -43,6 +27,7 @@ interface DataTableProps<TData, TValue> {
   lastPage: number;
   total: number;
   filter: GetIpAddressesParams;
+  filterOptions?: IpAddressesResponse["filter_options"];
   onFilterChange: (patch: Partial<GetIpAddressesParams>) => void;
   isFetching?: boolean;
 }
@@ -54,6 +39,7 @@ export function IpListDataTable<TData, TValue>({
   lastPage,
   total,
   filter,
+  filterOptions,
   onFilterChange,
   isFetching,
 }: DataTableProps<TData, TValue>) {
@@ -91,61 +77,13 @@ export function IpListDataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2.5 md:flex-nowrap">
-        <InputGroup className="max-w-xs">
-          <InputGroupInput
-            placeholder="Filter by IP address..."
-            value={filter.search}
-            onChange={(e) =>
-              onFilterChange({ search: e.target.value, page: 1 })
-            }
-          />
-          <InputGroupAddon>
-            {isFetching ? <Spinner /> : <SearchIcon />}
-          </InputGroupAddon>
-          <InputGroupAddon align="inline-end">
-            {total} result{total !== 1 ? "s" : ""}
-          </InputGroupAddon>
-        </InputGroup>
-        <ToggleGroup
-          type="single"
-          variant="outline"
-          value={filter.ownership ?? "all"}
-          onValueChange={(val) => {
-            if (!val) return;
-            onFilterChange({
-              ownership: val as OwnershipFilter,
-              page: 1,
-            });
-          }}
-        >
-          <ToggleGroupItem value="all">
-            <UsersIcon />
-            All
-          </ToggleGroupItem>
-          <ToggleGroupItem value="mine">
-            <UserLockIcon />
-            Mine
-          </ToggleGroupItem>
-          <ToggleGroupItem value="others">
-            <UserSearchIcon />
-            Others
-          </ToggleGroupItem>
-        </ToggleGroup>
-        {(filter.search || filter.ownership !== "all") && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-1.5"
-            onClick={() =>
-              onFilterChange({ search: "", ownership: "all", page: 1 })
-            }
-          >
-            <XIcon className="size-3.5" />
-            Clear
-          </Button>
-        )}
-      </div>
+      <IpListTableFilters
+        total={total}
+        filter={filter}
+        filterOptions={filterOptions}
+        isFetching={isFetching}
+        onFilterChange={onFilterChange}
+      />
 
       <div
         className={cn(

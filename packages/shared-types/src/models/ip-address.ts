@@ -61,3 +61,16 @@ export interface IpStatsResource {
   mine: number;
   others: number;
 }
+
+export interface IpOwnerOption {
+  id: number;
+  email: string | null;
+  count: number;
+}
+
+export interface IpAddressesResponse {
+  items: PaginatedResponse<IpAddressResource>;
+  filter_options: {
+    owners: IpOwnerOption[];
+  };
+}
