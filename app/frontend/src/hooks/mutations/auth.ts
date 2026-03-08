@@ -39,7 +39,6 @@ export function useRegisterMutation(): UseMutationResult<
       });
     },
     onSuccess: (data) => {
-      localStorage.setItem("access_token", data.tokens.access_token);
       localStorage.setItem("refresh_token", data.tokens.refresh_token);
 
       setAuth(data.user, data.tokens.access_token);
@@ -89,7 +88,6 @@ export function useLoginMutation(): UseMutationResult<
       });
     },
     onSuccess: (data) => {
-      localStorage.setItem("access_token", data.tokens.access_token);
       localStorage.setItem("refresh_token", data.tokens.refresh_token);
 
       setAuth(data.user, data.tokens.access_token);
@@ -136,7 +134,6 @@ export function useLogoutMutation(): UseMutationResult<
       });
     },
     onSuccess: (data) => {
-      localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
       clearAuth();
 

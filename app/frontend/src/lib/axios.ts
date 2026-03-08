@@ -12,7 +12,7 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("access_token");
+    const token = useAuthStore.getState().accessToken;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -41,7 +41,6 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem("refresh_token");
         if (!refreshToken) {
-          localStorage.removeItem("access_token");
           localStorage.removeItem("refresh_token");
           useAuthStore.getState().clearAuth();
 
@@ -57,13 +56,11 @@ api.interceptors.response.use(
           refresh_token: refreshToken,
         });
 
-        localStorage.setItem("access_token", data.data.access_token);
         useAuthStore.getState().updateToken(data.data.access_token);
 
         originalRequest.headers.Authorization = `Bearer ${data.data.access_token}`;
         return api(originalRequest);
       } catch (refreshError) {
-        localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
         useAuthStore.getState().clearAuth();
 

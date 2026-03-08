@@ -59,7 +59,7 @@ describe("useRegisterMutation", () => {
     mockPost.mockResolvedValue(mockAuthResponse);
   });
 
-  it("on success: stores tokens in localStorage and updates auth store", async () => {
+  it("on success: stores refresh_token in localStorage and updates auth store", async () => {
     const { result } = renderHook(() => useRegisterMutation(), {
       wrapper: makeWrapper(),
     });
@@ -72,7 +72,7 @@ describe("useRegisterMutation", () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(localStorage.getItem("access_token")).toBe("access-123");
+    expect(localStorage.getItem("access_token")).toBeNull();
     expect(localStorage.getItem("refresh_token")).toBe("refresh-456");
     expect(useAuthStore.getState().isAuthenticated).toBe(true);
     expect(useAuthStore.getState().accessToken).toBe("access-123");
@@ -110,7 +110,7 @@ describe("useLoginMutation", () => {
     mockPost.mockResolvedValue(mockAuthResponse);
   });
 
-  it("on success: stores tokens in localStorage and marks authenticated", async () => {
+  it("on success: stores refresh_token in localStorage and marks authenticated", async () => {
     const { result } = renderHook(() => useLoginMutation(), {
       wrapper: makeWrapper(),
     });
@@ -122,9 +122,10 @@ describe("useLoginMutation", () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(localStorage.getItem("access_token")).toBe("access-123");
+    expect(localStorage.getItem("access_token")).toBeNull();
     expect(localStorage.getItem("refresh_token")).toBe("refresh-456");
     expect(useAuthStore.getState().isAuthenticated).toBe(true);
+    expect(useAuthStore.getState().accessToken).toBe("access-123");
   });
 
   it("on error: does not store tokens or authenticate", async () => {
@@ -164,7 +165,7 @@ describe("useLogoutMutation", () => {
     });
   });
 
-  it("on success: removes tokens from localStorage and clears auth store", async () => {
+  it("on success: removes refresh_token from localStorage and clears auth store", async () => {
     const { result } = renderHook(() => useLogoutMutation(), {
       wrapper: makeWrapper(),
     });
@@ -173,9 +174,10 @@ describe("useLogoutMutation", () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(localStorage.getItem("access_token")).toBeNull();
+    expect(localStorage.getItem("access_token")).toBe("existing-token"); // not managed by mutation; Zustand persist owns access_token
     expect(localStorage.getItem("refresh_token")).toBeNull();
     expect(useAuthStore.getState().isAuthenticated).toBe(false);
+    expect(useAuthStore.getState().accessToken).toBeNull();
     expect(useAuthStore.getState().user).toBeNull();
   });
 });
