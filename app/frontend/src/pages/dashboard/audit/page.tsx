@@ -31,20 +31,16 @@ export default function AuditLogPage() {
     sortDir: "desc",
   });
 
-  const debouncedAuthText = useDebounce({
-    ip_address: authFilter.ip_address,
-  });
+  const debouncedAuthIpAddress = useDebounce(authFilter.ip_address, 400);
   const authQueryFilter: AuthAuditLogParams = {
     ...authFilter,
-    ...debouncedAuthText,
+    ip_address: debouncedAuthIpAddress,
   };
 
-  const debouncedIpText = useDebounce({
-    ip_address: ipFilter.ip_address,
-  });
+  const debouncedIpIpAddress = useDebounce(ipFilter.ip_address, 400);
   const ipQueryFilter: IpAuditLogParams = {
     ...ipFilter,
-    ...debouncedIpText,
+    ip_address: debouncedIpIpAddress,
   };
 
   const {
