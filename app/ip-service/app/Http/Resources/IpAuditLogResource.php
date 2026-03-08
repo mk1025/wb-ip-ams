@@ -25,7 +25,7 @@ class IpAuditLogResource extends JsonResource
             'ip_address' => $this->ip_address,
             'user_agent' => $this->user_agent,
             'session_id' => $this->session_id,
-            'created_at' => $this->created_at,
+            'created_at' => $this->created_at?->toISOString(),
         ];
     }
 }
