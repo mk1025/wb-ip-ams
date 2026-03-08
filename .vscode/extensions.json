@@ -1,0 +1,16 @@
+{
+  "recommendations": [
+    "ms-azuretools.vscode-docker",
+    "docker.docker",
+    "laravel.vscode-laravel",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "vitest.explorer",
+    "redhat.vscode-yaml",
+    "dotenv.dotenv-vscode",
+    "dbaeumer.vscode-eslint",
+    "github.vscode-github-actions",
+    "ms-vscode.vscode-typescript-next",
+    "dotjoshjohnson.xml"
+  ]
+}
