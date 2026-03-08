@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -20,5 +21,14 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Throwable $e, Request $request): mixed {
+            if ($request->expectsJson()
+                && ! ($e instanceof \Illuminate\Validation\ValidationException)
+                && ! ($e instanceof \Illuminate\Auth\AuthenticationException)
+            ) {
+                return response()->json(['success' => false, 'message' => 'An unexpected error occurred.'], 500);
+            }
+
+            return null;
+        });
     })->create();
