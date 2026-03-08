@@ -1,0 +1,143 @@
+name: Tests
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  auth-service:
+    name: Auth Service (Pint + PHPStan + PHPUnit)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: sqlite3, pdo_sqlite
+          coverage: none
+
+      - name: Copy .env
+        working-directory: app/auth-service
+        run: cp .env.example .env
+
+      - name: Install dependencies
+        working-directory: app/auth-service
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Check code style (Pint)
+        working-directory: app/auth-service
+        run: ./vendor/bin/pint --test
+
+      - name: Static analysis (PHPStan)
+        working-directory: app/auth-service
+        run: ./vendor/bin/phpstan analyse --memory-limit=512M
+
+      - name: Run tests
+        working-directory: app/auth-service
+        run: php artisan test --no-coverage
+
+  ip-service:
+    name: IP Service (Pint + PHPStan + PHPUnit)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: sqlite3, pdo_sqlite
+          coverage: none
+
+      - name: Copy .env
+        working-directory: app/ip-service
+        run: cp .env.example .env
+
+      - name: Install dependencies
+        working-directory: app/ip-service
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Check code style (Pint)
+        working-directory: app/ip-service
+        run: ./vendor/bin/pint --test
+
+      - name: Static analysis (PHPStan)
+        working-directory: app/ip-service
+        run: ./vendor/bin/phpstan analyse --memory-limit=512M
+
+      - name: Run tests
+        working-directory: app/ip-service
+        run: php artisan test --no-coverage
+
+  gateway:
+    name: Gateway (Pint + PHPStan)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: sqlite3, pdo_sqlite
+          coverage: none
+
+      - name: Copy .env
+        working-directory: app/gateway
+        run: cp .env.example .env
+
+      - name: Install dependencies
+        working-directory: app/gateway
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Check code style (Pint)
+        working-directory: app/gateway
+        run: ./vendor/bin/pint --test
+
+      - name: Static analysis (PHPStan)
+        working-directory: app/gateway
+        run: ./vendor/bin/phpstan analyse --memory-limit=512M
+
+  frontend:
+    name: Frontend (Vitest)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: "10"
+          run_install: false
+
+      - name: Get pnpm store path
+        id: pnpm-cache
+        run: echo "store=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.store }}
+          key: pnpm-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared types
+        run: pnpm --filter @wb-ip-ams/shared-types build
+
+      - name: Run tests
+        working-directory: app/frontend
+        run: pnpm test run
