@@ -34,7 +34,7 @@ class AuthAuditLog extends Model
     public function save(array $options = []): bool
     {
         if ($this->exists) {
-            return false;
+            throw new \LogicException('Audit log records are immutable and cannot be updated.');
         }
 
         return parent::save($options);
