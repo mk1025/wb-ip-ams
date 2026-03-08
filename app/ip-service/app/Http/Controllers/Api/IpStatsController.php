@@ -17,14 +17,15 @@ class IpStatsController extends Controller
         $guard = auth('api');
         $user = $guard->user();
 
-        $total = IpAddress::count();
-        $mine = IpAddress::where('owner_id', $user->id)->count();
-        $others = IpAddress::where('owner_id', '!=', $user->id)->count();
+        $stats = IpAddress::selectRaw(
+            'COUNT(*) as total, SUM(CASE WHEN owner_id = ? THEN 1 ELSE 0 END) as mine, SUM(CASE WHEN owner_id != ? THEN 1 ELSE 0 END) as others',
+            [$user->id, $user->id]
+        )->first();
 
         return $this->success([
-            'total' => $total,
-            'mine' => $mine,
-            'others' => $others,
+            'total' => (int) $stats->total,
+            'mine' => (int) $stats->mine,
+            'others' => (int) $stats->others,
         ]);
     }
 }
