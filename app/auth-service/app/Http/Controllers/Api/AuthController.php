@@ -39,10 +39,11 @@ class AuthController extends Controller
         // Sync user to IP service
         $this->syncUserToIpService($user);
 
-        $accessToken = JWTAuth::fromUser($user);
+        $sessionId = (string) Str::uuid();
+        $accessToken = JWTAuth::claims(['session_id' => $sessionId])->fromUser($user);
         $refreshToken = $this->createRefreshToken($user);
 
-        $this->logAuthEvent($user, 'register', $request);
+        $this->logAuthEvent($user, 'register', $request, $sessionId);
 
         $resource = new AuthResource($user, $accessToken, $refreshToken->token);
 
@@ -52,25 +53,21 @@ class AuthController extends Controller
     // Login user
     public function login(LoginRequest $request): JsonResponse
     {
-        $credentials = $request->only('email', 'password');
+        $user = User::where('email', $request->email)->first();
 
-        // For some reason, it doesn't recognize the guard when using auth()->attempt(), so we need to specify it explicitly
-        /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
-        $guard = auth('api');
-
-        if (! $token = $guard->attempt($credentials)) {
+        if (! $user || ! Hash::check((string) $request->password, $user->password)) {
             return $this->unauthorized('Invalid credentials');
         }
-
-        $user = $guard->user();
 
         // Sync user to IP service on login
         $this->syncUserToIpService($user);
 
+        $sessionId = (string) Str::uuid();
+        $token = JWTAuth::claims(['session_id' => $sessionId])->fromUser($user);
         $refreshToken = $this->createRefreshToken($user);
 
         // Log the login
-        $this->logAuthEvent($user, 'login', $request);
+        $this->logAuthEvent($user, 'login', $request, $sessionId);
 
         $resource = new AuthResource($user, $token, $refreshToken->token);
 
@@ -84,9 +81,17 @@ class AuthController extends Controller
         $guard = auth('api');
         $user = $guard->user();
 
+        $sessionId = null;
+        try {
+            $raw = JWTAuth::parseToken()->getPayload()->get('session_id');
+            $sessionId = is_string($raw) ? $raw : null;
+        } catch (\Throwable) {
+            // session_id is best-effort; no token in context during testing
+        }
+
         RefreshToken::where('user_id', $user->id)->delete();
 
-        $this->logAuthEvent($user, 'logout', $request);
+        $this->logAuthEvent($user, 'logout', $request, $sessionId);
 
         $guard->logout();
 
@@ -117,9 +122,10 @@ class AuthController extends Controller
             return $this->unauthorized('User not found');
         }
 
-        $newAccessToken = JWTAuth::fromUser($user);
+        $sessionId = (string) Str::uuid();
+        $newAccessToken = JWTAuth::claims(['session_id' => $sessionId])->fromUser($user);
 
-        $this->logAuthEvent($user, 'token_refresh', $request);
+        $this->logAuthEvent($user, 'token_refresh', $request, $sessionId);
 
         $resource = new TokenResource($newAccessToken);
 
@@ -143,14 +149,14 @@ class AuthController extends Controller
     }
 
     // Log authentication events for auditing
-    private function logAuthEvent(User $user, string $action, Request $request): void
+    private function logAuthEvent(User $user, string $action, Request $request, ?string $sessionId = null): void
     {
         AuthAuditLog::create([
             'user_id' => $user->id,
             'action' => $action,
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
-            'session_id' => null,
+            'session_id' => $sessionId,
             'created_at' => now(),
         ]);
     }

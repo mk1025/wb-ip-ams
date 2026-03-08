@@ -40,6 +40,7 @@ export default function IpLogsTable({
     filter.user_id ||
     filter.action ||
     filter.ip_address ||
+    filter.session_id ||
     filter.date_from ||
     filter.date_to;
 
@@ -93,6 +94,7 @@ export default function IpLogsTable({
               <TableHead>{sortHeader("action", "Action")}</TableHead>
               <TableHead>{sortHeader("user_id", "User")}</TableHead>
               <TableHead>{sortHeader("entity_id", "IP Record")}</TableHead>
+              <TableHead>Session</TableHead>
               <TableHead>Old Value</TableHead>
               <TableHead>New Value</TableHead>
               <TableHead>{sortHeader("created_at", "Timestamp")}</TableHead>
@@ -102,7 +104,7 @@ export default function IpLogsTable({
             {data.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={6}
+                  colSpan={7}
                   className="text-muted-foreground h-24 text-center"
                 >
                   {hasFilters
@@ -139,6 +141,9 @@ export default function IpLogsTable({
                     <Badge variant="ghost" className="font-mono text-xs">
                       #{log.entity_id}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground font-mono text-xs">
+                    {log.session_id ?? "—"}
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
                     <IpValueCell value={log.old_value} />

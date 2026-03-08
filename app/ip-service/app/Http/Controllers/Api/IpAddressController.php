@@ -13,6 +13,8 @@ use App\Models\IpAuditLog;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
 class IpAddressController extends Controller
 {
@@ -65,7 +67,7 @@ class IpAddressController extends Controller
 
         $ipAddresses = $query->paginate(15);
 
-        $ownerOptions = IpAddress::with('owner:id,email')
+        $ownerOptions = Cache::remember('ip_address_owner_options', 60, fn () => IpAddress::with('owner:id,email')
             ->select('owner_id')
             ->selectRaw('count(*) as count')
             ->groupBy('owner_id')
@@ -77,7 +79,8 @@ class IpAddressController extends Controller
                 'count' => (int) $row->getAttribute('count'),
             ])
             ->filter(fn ($o) => ! is_null($o['email']))
-            ->values();
+            ->values()
+            ->toArray());
 
         return $this->success([
             'items' => $ipAddresses->through(fn ($ip) => new IpAddressResource($ip)),
@@ -143,7 +146,7 @@ class IpAddressController extends Controller
             'comment' => $request->comment,
         ]);
 
-        $ipAddress->setRelation('owner', $user);
+        $ipAddress->load('owner');
 
         $this->logAudit($user->id, 'update', $ipAddress->id, $oldValues, $ipAddress->toArray(), $request);
 
@@ -186,6 +189,14 @@ class IpAddressController extends Controller
      */
     private function logAudit(int $userId, string $action, int $entityId, ?array $oldValue, ?array $newValue, Request $request): void
     {
+        $sessionId = null;
+        try {
+            $raw = JWTAuth::parseToken()->getPayload()->get('session_id');
+            $sessionId = is_string($raw) ? $raw : null;
+        } catch (\Throwable) {
+            // session_id is best-effort; no token in context during testing
+        }
+
         IpAuditLog::create([
             'user_id' => $userId,
             'action' => $action,
@@ -194,7 +205,7 @@ class IpAddressController extends Controller
             'new_value' => $newValue,
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
-            'session_id' => null,
+            'session_id' => $sessionId,
             'created_at' => now(),
         ]);
     }

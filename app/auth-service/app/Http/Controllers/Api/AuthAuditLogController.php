@@ -53,6 +53,10 @@ class AuthAuditLogController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
+        if ($request->filled('session_id')) {
+            $query->where('session_id', $request->session_id);
+        }
+
         $logs = $query->paginate(15);
 
         $userOptions = Cache::remember('auth_audit_user_options', 60, fn () => AuthAuditLog::with('user:id,email')

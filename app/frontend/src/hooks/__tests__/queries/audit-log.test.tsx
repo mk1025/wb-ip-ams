@@ -26,7 +26,22 @@ function makeWrapper() {
 const mockGet = api.get as Mock;
 
 const auditMockData = {
-  logs: { data: [], current_page: 1, total: 0 },
+  logs: {
+    data: [
+      {
+        id: 1,
+        user_id: 1,
+        user_email: "admin@example.com",
+        action: "login",
+        ip_address: "127.0.0.1",
+        user_agent: null,
+        session_id: "550e8400-e29b-41d4-a716-446655440000",
+        created_at: "2026-03-09T00:00:00.000Z",
+      },
+    ],
+    current_page: 1,
+    total: 1,
+  },
   filter_options: { users: [], actions: [] },
 };
 
@@ -55,6 +70,32 @@ describe("useGetAuthAuditLogs", () => {
 
     expect(mockGet).toHaveBeenCalledWith("/audit/auth", { params });
   });
+
+  it("forwards session_id filter param", async () => {
+    const params: AuthAuditLogParams = {
+      session_id: "550e8400-e29b-41d4-a716-446655440000",
+    };
+
+    const { result } = renderHook(() => useGetAuthAuditLogs(params), {
+      wrapper: makeWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(mockGet).toHaveBeenCalledWith("/audit/auth", { params });
+  });
+
+  it("response data includes session_id on log entries", async () => {
+    const { result } = renderHook(() => useGetAuthAuditLogs(), {
+      wrapper: makeWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data?.logs.data[0].session_id).toBe(
+      "550e8400-e29b-41d4-a716-446655440000",
+    );
+  });
 });
 
 describe("useGetIpAuditLogs", () => {
@@ -80,5 +121,31 @@ describe("useGetIpAuditLogs", () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(mockGet).toHaveBeenCalledWith("/audit/ip", { params });
+  });
+
+  it("forwards session_id filter param", async () => {
+    const params: IpAuditLogParams = {
+      session_id: "550e8400-e29b-41d4-a716-446655440000",
+    };
+
+    const { result } = renderHook(() => useGetIpAuditLogs(params), {
+      wrapper: makeWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(mockGet).toHaveBeenCalledWith("/audit/ip", { params });
+  });
+
+  it("response data includes session_id on log entries", async () => {
+    const { result } = renderHook(() => useGetIpAuditLogs(), {
+      wrapper: makeWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data?.logs.data[0].session_id).toBe(
+      "550e8400-e29b-41d4-a716-446655440000",
+    );
   });
 });

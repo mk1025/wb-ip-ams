@@ -42,6 +42,6 @@ class AuthAuditLog extends Model
 
     public function delete(): bool
     {
-        return false;
+        throw new \LogicException('Audit log records are immutable and cannot be deleted.');
     }
 }
