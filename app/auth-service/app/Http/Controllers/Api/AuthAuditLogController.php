@@ -7,6 +7,7 @@ use App\Http\Resources\AuthAuditLogResource;
 use App\Models\AuthAuditLog;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class AuthAuditLogController extends Controller
 {
@@ -51,7 +52,7 @@ class AuthAuditLogController extends Controller
 
         $logs = $query->paginate(15);
 
-        $userOptions = AuthAuditLog::with('user:id,email')
+        $userOptions = Cache::remember('auth_audit_user_options', 60, fn () => AuthAuditLog::with('user:id,email')
             ->selectRaw('user_id, count(*) as count')
             ->whereNotNull('user_id')
             ->groupBy('user_id')
@@ -63,16 +64,16 @@ class AuthAuditLogController extends Controller
                 'count' => (int) $row->count,
             ])
             ->filter(fn ($u) => ! is_null($u['email']))
-            ->values();
+            ->values());
 
-        $actionOptions = AuthAuditLog::selectRaw('action, count(*) as count')
+        $actionOptions = Cache::remember('auth_audit_action_options', 60, fn () => AuthAuditLog::selectRaw('action, count(*) as count')
             ->groupBy('action')
             ->orderByDesc('count')
             ->get()
             ->map(fn ($row) => [
                 'value' => $row->action,
                 'count' => (int) $row->count,
-            ]);
+            ]));
 
         $response = [
             'logs' => $logs->through(fn ($log) => new AuthAuditLogResource($log)),
