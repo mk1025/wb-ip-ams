@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -37,14 +38,21 @@ class GatewayController extends Controller
 
         $httpRequest = $httpRequest->timeout(30);
 
-        $response = match ($method) {
-            'get' => $httpRequest->get($url, $request->query()),
-            'post' => $httpRequest->post($url, $request->all()),
-            'put' => $httpRequest->put($url, $request->all()),
-            'patch' => $httpRequest->patch($url, $request->all()),
-            'delete' => $httpRequest->delete($url, $request->all()),
-            default => $httpRequest->get($url),
-        };
+        try {
+            $response = match ($method) {
+                'get' => $httpRequest->get($url, $request->query()),
+                'post' => $httpRequest->post($url, $request->all()),
+                'put' => $httpRequest->put($url, $request->all()),
+                'patch' => $httpRequest->patch($url, $request->all()),
+                'delete' => $httpRequest->delete($url, $request->all()),
+                default => $httpRequest->get($url),
+            };
+        } catch (ConnectionException) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Service unavailable. Please try again later.',
+            ], 503);
+        }
 
         return response($response->body(), $response->status())
             ->withHeaders([
