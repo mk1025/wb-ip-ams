@@ -97,6 +97,8 @@ class IpAddressController extends Controller
             'owner_id' => $user->id,
         ]);
 
+        $ipAddress->setRelation('owner', $user);
+
         $this->logAudit($user->id, 'create', $ipAddress->id, null, $ipAddress->toArray(), $request);
 
         return $this->created(new IpAddressResource($ipAddress));
@@ -137,6 +139,8 @@ class IpAddressController extends Controller
             'label' => $request->label,
             'comment' => $request->comment,
         ]);
+
+        $ipAddress->setRelation('owner', $user);
 
         $this->logAudit($user->id, 'update', $ipAddress->id, $oldValues, $ipAddress->toArray(), $request);
 
