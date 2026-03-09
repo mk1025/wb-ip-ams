@@ -56,6 +56,10 @@ api.interceptors.response.use(
           refresh_token: refreshToken,
         });
 
+        if (!data?.data?.access_token) {
+          throw new Error("Refresh failed");
+        }
+
         useAuthStore.getState().updateToken(data.data.access_token);
 
         originalRequest.headers.Authorization = `Bearer ${data.data.access_token}`;
