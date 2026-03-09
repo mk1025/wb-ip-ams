@@ -59,8 +59,12 @@ services:
       DB_DATABASE: auth_service_db
       DB_USERNAME: ${AUTH_DB_USERNAME:-auth_user}
       DB_PASSWORD: ${AUTH_DB_PASSWORD:-auth_secret}
-      # Generate a shared secret: openssl rand -base64 64
-      JWT_SECRET: ${JWT_SECRET:-change-me-generate-with-openssl-rand-base64-64}
+      # RS256 asymmetric JWT — Auth holds private key (signs), IP holds public key only (verifies).
+      # Generate: openssl genrsa -out private.pem 4096 && openssl rsa -in private.pem -pubout -out public.pem
+      # Encode:   JWT_PRIVATE_KEY=$(base64 -w 0 private.pem)  &&  JWT_PUBLIC_KEY=$(base64 -w 0 public.pem)
+      JWT_ALGO: RS256
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY:?JWT_PRIVATE_KEY is required}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:?JWT_PUBLIC_KEY is required}
       JWT_TTL: ${JWT_TTL:-1440}
       IP_SERVICE_URL: http://ip-service:8000
       # Shared secret for internal service-to-service calls
@@ -91,8 +95,9 @@ services:
       DB_DATABASE: ip_service_db
       DB_USERNAME: ${IP_DB_USERNAME:-ip_user}
       DB_PASSWORD: ${IP_DB_PASSWORD:-ip_secret}
-      # Must match auth-service JWT_SECRET
-      JWT_SECRET: ${JWT_SECRET:-change-me-generate-with-openssl-rand-base64-64}
+      # RS256 public key only — IP Service verifies tokens but must never hold the private key.
+      JWT_ALGO: RS256
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:?JWT_PUBLIC_KEY is required}
       JWT_TTL: ${JWT_TTL:-1440}
       # Shared secret for internal service-to-service calls
       INTERNAL_SECRET: ${INTERNAL_SECRET:-change-me-internal-secret}

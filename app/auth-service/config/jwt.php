@@ -48,20 +48,20 @@ return [
         |
         */
 
-        'public' => env('JWT_PUBLIC_KEY'),
+        'public' => env('JWT_PUBLIC_KEY') ? base64_decode(env('JWT_PUBLIC_KEY')) : null,
 
         /*
         |--------------------------------------------------------------------------
         | Private Key
         |--------------------------------------------------------------------------
         |
-        | A path or resource to your private key.
-        |
-        | E.g. 'file://path/to/private/key'
+        | A base64-encoded RSA private key (RS256). Only required on the
+        | service that issues tokens (Auth Service). The IP Service should
+        | never have access to the private key.
         |
         */
 
-        'private' => env('JWT_PRIVATE_KEY'),
+        'private' => env('JWT_PRIVATE_KEY') ? base64_decode(env('JWT_PRIVATE_KEY')) : null,
 
         /*
         |--------------------------------------------------------------------------

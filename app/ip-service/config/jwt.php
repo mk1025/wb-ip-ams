@@ -48,20 +48,22 @@ return [
         |
         */
 
-        'public' => env('JWT_PUBLIC_KEY'),
+        'public' => env('JWT_PUBLIC_KEY') ? base64_decode(env('JWT_PUBLIC_KEY')) : null,
 
         /*
         |--------------------------------------------------------------------------
         | Private Key
         |--------------------------------------------------------------------------
         |
-        | A path or resource to your private key.
-        |
-        | E.g. 'file://path/to/private/key'
+        | The IP Service only verifies tokens — it never signs them. The JWT
+        | library requires this to be non-null for asymmetric algorithms, so we
+        | reuse the public key as a placeholder. The library only calls
+        | getSigningKey() during encode(), which this service never invokes.
+        | Attempting to sign with a public key would fail at the OpenSSL level.
         |
         */
 
-        'private' => env('JWT_PRIVATE_KEY'),
+        'private' => env('JWT_PUBLIC_KEY') ? base64_decode(env('JWT_PUBLIC_KEY')) : null,
 
         /*
         |--------------------------------------------------------------------------
