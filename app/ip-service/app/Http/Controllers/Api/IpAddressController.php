@@ -139,7 +139,8 @@ class IpAddressController extends Controller
             return $this->forbidden('You do not have permission to update this IP address');
         }
 
-        $oldValues = $ipAddress->toArray();
+        $snapshotKeys = ['ip_address', 'label', 'comment', 'owner_id'];
+        $oldValues = $ipAddress->only($snapshotKeys);
 
         $ipAddress->update([
             'label' => $request->label,
@@ -148,7 +149,7 @@ class IpAddressController extends Controller
 
         $ipAddress->load('owner');
 
-        $this->logAudit($user->id, 'update', $ipAddress->id, $oldValues, $ipAddress->toArray(), $request);
+        $this->logAudit($user->id, 'update', $ipAddress->id, $oldValues, $ipAddress->only($snapshotKeys), $request);
 
         return $this->success(new IpAddressResource($ipAddress));
     }

@@ -422,6 +422,7 @@ class IpAddressTest extends TestCase
         $this->assertNotNull($log);
         $this->assertEquals('Before', $log->old_value['label']);
         $this->assertEquals('After', $log->new_value['label']);
+        $this->assertEquals(array_keys($log->old_value), array_keys($log->new_value));
     }
 
     public function test_update_returns_401_for_unauthenticated_request(): void
