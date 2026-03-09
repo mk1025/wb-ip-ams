@@ -42,14 +42,21 @@ class AuthAuditLogController extends Controller
         }
 
         if ($request->filled('ip_address')) {
-            $query->where('ip_address', 'like', '%'.$request->ip_address.'%');
+            $escaped = str_replace(['%', '_'], ['\\%', '\\_'], $request->ip_address);
+            $query->where('ip_address', 'like', '%'.$escaped.'%');
         }
 
         if ($request->filled('date_from')) {
+            if (! strtotime($request->date_from) || ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $request->date_from)) {
+                return $this->error('Invalid date_from format. Use Y-m-d.', 422);
+            }
             $query->whereDate('created_at', '>=', $request->date_from);
         }
 
         if ($request->filled('date_to')) {
+            if (! strtotime($request->date_to) || ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $request->date_to)) {
+                return $this->error('Invalid date_to format. Use Y-m-d.', 422);
+            }
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 

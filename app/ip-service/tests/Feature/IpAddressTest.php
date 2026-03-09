@@ -589,6 +589,26 @@ class IpAddressTest extends TestCase
         $this->assertEquals(['create', 'update'], $actions);
     }
 
+    public function test_audit_logs_returns_422_for_invalid_date_from(): void
+    {
+        $admin = User::factory()->create(['role' => 'super-admin']);
+
+        $response = $this->actingAs($admin, 'api')
+            ->getJson('/api/ip-addresses/audit-logs?date_from=not-a-date');
+
+        $response->assertStatus(422);
+    }
+
+    public function test_audit_logs_returns_422_for_invalid_date_to(): void
+    {
+        $admin = User::factory()->create(['role' => 'super-admin']);
+
+        $response = $this->actingAs($admin, 'api')
+            ->getJson('/api/ip-addresses/audit-logs?date_to=2024-13-99');
+
+        $response->assertStatus(422);
+    }
+
     public function test_stats_returns_correct_counts(): void
     {
         $user = User::factory()->create();

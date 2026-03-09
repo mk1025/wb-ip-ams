@@ -424,4 +424,24 @@ class AuthTest extends TestCase
         $ids = collect($response->json('data.logs.data'))->pluck('id')->all();
         $this->assertEquals([$log2->id, $log1->id], $ids);
     }
+
+    public function test_audit_logs_returns_422_for_invalid_date_from(): void
+    {
+        $admin = User::factory()->create(['role' => 'super-admin']);
+
+        $response = $this->actingAs($admin, 'api')
+            ->getJson('/api/auth/audit-logs?date_from=not-a-date');
+
+        $response->assertStatus(422);
+    }
+
+    public function test_audit_logs_returns_422_for_invalid_date_to(): void
+    {
+        $admin = User::factory()->create(['role' => 'super-admin']);
+
+        $response = $this->actingAs($admin, 'api')
+            ->getJson('/api/auth/audit-logs?date_to=2024-13-99');
+
+        $response->assertStatus(422);
+    }
 }
