@@ -17,7 +17,7 @@ class VerifyInternalSecret
     {
         $secret = config('app.internal_secret');
 
-        if (! $secret || $request->header('X-Internal-Secret') !== $secret) {
+        if (! $secret || ! hash_equals($secret, (string) ($request->header('X-Internal-Secret') ?? ''))) {
             return $this->unauthorized();
         }
 
