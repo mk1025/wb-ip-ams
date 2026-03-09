@@ -29,7 +29,7 @@ class IpAddressController extends Controller
         $query = IpAddress::query();
 
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = str_replace(['%', '_'], ['\\%', '\\_'], $request->search);
             $query->where(function ($q) use ($search) {
                 $q->where('ip_address', 'like', '%'.$search.'%')
                     ->orWhere('label', 'like', '%'.$search.'%');
@@ -48,10 +48,16 @@ class IpAddressController extends Controller
         }
 
         if ($request->filled('date_from')) {
+            if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $request->date_from) || ! strtotime($request->date_from)) {
+                return $this->error('Invalid date_from format. Use Y-m-d.', 422);
+            }
             $query->whereDate('created_at', '>=', $request->date_from);
         }
 
         if ($request->filled('date_to')) {
+            if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $request->date_to) || ! strtotime($request->date_to)) {
+                return $this->error('Invalid date_to format. Use Y-m-d.', 422);
+            }
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 

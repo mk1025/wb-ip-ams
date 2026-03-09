@@ -636,6 +636,37 @@ class IpAddressTest extends TestCase
         $response->assertStatus(422);
     }
 
+    public function test_index_returns_422_for_invalid_date_from(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user, 'api')
+            ->getJson('/api/ip-addresses?date_from=not-a-date')
+            ->assertStatus(422);
+    }
+
+    public function test_index_returns_422_for_invalid_date_to(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user, 'api')
+            ->getJson('/api/ip-addresses?date_to=2024-13-99')
+            ->assertStatus(422);
+    }
+
+    public function test_index_search_wildcards_are_escaped(): void
+    {
+        $user = User::factory()->create();
+        IpAddress::create(['ip_address' => '10.0.0.1', 'label' => 'Anything', 'owner_id' => $user->id]);
+
+        // '%' would match everything without escaping
+        $response = $this->actingAs($user, 'api')
+            ->getJson('/api/ip-addresses?search=%');
+
+        $response->assertStatus(200);
+        $this->assertCount(0, $response->json('data.items.data'));
+    }
+
     public function test_stats_returns_correct_counts(): void
     {
         $user = User::factory()->create();
