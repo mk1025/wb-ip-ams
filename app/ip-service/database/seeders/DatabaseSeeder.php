@@ -8,6 +8,7 @@ use App\Models\IpAddress;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,17 +19,17 @@ class DatabaseSeeder extends Seeder
         // Mirror
         $admin = User::firstOrCreate(
             ['email' => 'admin@example.com'],
-            ['role' => 'super-admin', 'password' => 'synced']
+            ['role' => 'super-admin', 'password' => Hash::make('not-used')]
         );
 
         $alice = User::firstOrCreate(
             ['email' => 'alice@example.com'],
-            ['role' => 'user', 'password' => 'synced']
+            ['role' => 'user', 'password' => Hash::make('not-used')]
         );
 
         $bob = User::firstOrCreate(
             ['email' => 'bob@example.com'],
-            ['role' => 'user', 'password' => 'synced']
+            ['role' => 'user', 'password' => Hash::make('not-used')]
         );
 
         // Sample IP addresses

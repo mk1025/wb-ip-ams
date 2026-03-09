@@ -45,17 +45,17 @@ export default function IpLogsTable({
     filter.date_to;
 
   function sortHeader(
-    col: NonNullable<IpAuditLogParams["sortBy"]>,
+    col: NonNullable<IpAuditLogParams["sort_by"]>,
     label: string,
   ) {
-    const isActive = filter.sortBy === col;
+    const isActive = filter.sort_by === col;
     return (
       <Button
         variant="ghost"
         onClick={() =>
           onFilterChange?.({
-            sortBy: col,
-            sortDir: isActive && filter.sortDir === "asc" ? "desc" : "asc",
+            sort_by: col,
+            sort_dir: isActive && filter.sort_dir === "asc" ? "desc" : "asc",
             page: 1,
           })
         }
@@ -63,7 +63,7 @@ export default function IpLogsTable({
       >
         {label}
         {isActive ? (
-          filter.sortDir === "asc" ? (
+          filter.sort_dir === "asc" ? (
             <ArrowUpIcon className="size-3.5" />
           ) : (
             <ArrowDownIcon className="size-3.5" />

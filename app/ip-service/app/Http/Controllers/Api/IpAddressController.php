@@ -107,6 +107,10 @@ class IpAddressController extends Controller
 
         $this->logAudit($user->id, 'create', $ipAddress->id, null, $ipAddress->toArray(), $request);
 
+        Cache::forget('ip_address_owner_options');
+        Cache::forget('ip_audit_user_options');
+        Cache::forget('ip_audit_action_options');
+
         return $this->created(new IpAddressResource($ipAddress));
     }
 
@@ -151,6 +155,10 @@ class IpAddressController extends Controller
 
         $this->logAudit($user->id, 'update', $ipAddress->id, $oldValues, $ipAddress->only($snapshotKeys), $request);
 
+        Cache::forget('ip_address_owner_options');
+        Cache::forget('ip_audit_user_options');
+        Cache::forget('ip_audit_action_options');
+
         return $this->success(new IpAddressResource($ipAddress));
     }
 
@@ -178,6 +186,10 @@ class IpAddressController extends Controller
         $ipAddress->delete();
 
         $this->logAudit($user->id, 'delete', $ipAddress->id, $oldValues, null, $request);
+
+        Cache::forget('ip_address_owner_options');
+        Cache::forget('ip_audit_user_options');
+        Cache::forget('ip_audit_action_options');
 
         return $this->success(null, 'IP address deleted successfully');
     }

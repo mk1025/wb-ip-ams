@@ -35,8 +35,8 @@ export interface IpAuditLogParams {
   session_id?: string;
   date_from?: string;
   date_to?: string;
-  sortBy?: "action" | "user_id" | "entity_id" | "created_at";
-  sortDir?: "asc" | "desc";
+  sort_by?: "action" | "user_id" | "entity_id" | "created_at";
+  sort_dir?: "asc" | "desc";
 }
 
 export function useGetAuthAuditLogs(

@@ -27,8 +27,8 @@ export default function AuditLogPage() {
   });
   const [ipFilter, setIpFilter] = useState<IpAuditLogParams>({
     page: 1,
-    sortBy: "created_at",
-    sortDir: "desc",
+    sort_by: "created_at",
+    sort_dir: "desc",
   });
 
   const debouncedAuthIpAddress = useDebounce(authFilter.ip_address, 400);

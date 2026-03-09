@@ -610,7 +610,7 @@ class IpAddressTest extends TestCase
         IpAuditLog::create(['user_id' => $admin->id, 'action' => 'create', 'entity_id' => $ip->id, 'created_at' => now()]);
 
         $response = $this->actingAs($admin, 'api')
-            ->getJson("/api/ip-addresses/audit-logs?sortBy=action&sortDir=asc&entity_id={$ip->id}");
+            ->getJson("/api/ip-addresses/audit-logs?sort_by=action&sort_dir=asc&entity_id={$ip->id}");
 
         $actions = collect($response->json('data.logs.data'))->pluck('action')->all();
         $this->assertEquals(['create', 'update'], $actions);

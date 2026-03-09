@@ -31,7 +31,13 @@ export default function AuthLogsTable({
   const currentPage = response?.logs.current_page ?? 1;
   const lastPage = response?.logs.last_page ?? 1;
   const total = response?.logs.total ?? 0;
-  const hasFilters = filter.user_id || filter.action || filter.session_id;
+  const hasFilters =
+    filter.user_id ||
+    filter.action ||
+    filter.ip_address ||
+    filter.session_id ||
+    filter.date_from ||
+    filter.date_to;
 
   function sortHeader(
     col: NonNullable<AuthAuditLogParams["sortBy"]>,

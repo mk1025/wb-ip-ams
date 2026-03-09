@@ -38,9 +38,11 @@ export default function IpForm() {
 
   const navigate = useNavigate();
 
-  const { data: existing, isLoading: isLoadingExisting } = useGetIpAddress(
-    isEdit ? Number(id) : 0,
-  );
+  const {
+    data: existing,
+    isLoading: isLoadingExisting,
+    isError: isErrorExisting,
+  } = useGetIpAddress(isEdit ? Number(id) : 0);
 
   const { mutateAsync: createIp, isPending: isCreating } =
     useCreateIpAddressMutation();
@@ -76,6 +78,17 @@ export default function IpForm() {
     return (
       <div className="flex items-center justify-center py-20">
         <Spinner />
+      </div>
+    );
+  }
+
+  if (isEdit && isErrorExisting) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-20">
+        <p className="text-destructive">Failed to load IP address.</p>
+        <Button variant="outline" onClick={() => navigate("/ips")}>
+          Back to list
+        </Button>
       </div>
     );
   }
