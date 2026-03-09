@@ -690,4 +690,46 @@ class IpAddressTest extends TestCase
 
         $response->assertStatus(401);
     }
+
+    public function test_user_sync_returns_422_on_duplicate_email_for_different_id(): void
+    {
+        User::factory()->create(['email' => 'taken@example.com']);
+        $other = User::factory()->create();
+
+        // Try to sync a different user ID with the already-taken email
+        $response = $this->postJson('/api/internal/users/sync', [
+            'id' => $other->id,
+            'email' => 'taken@example.com',
+            'role' => 'user',
+        ], ['X-Internal-Secret' => config('app.internal_secret')]);
+
+        $response->assertStatus(422)->assertJsonPath('success', false);
+    }
+
+    public function test_store_audit_snapshot_contains_only_expected_keys(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user, 'api')->postJson('/api/ip-addresses', [
+            'ip_address' => '192.0.2.55',
+            'label' => 'Snapshot Test',
+        ]);
+
+        $ip = IpAddress::where('ip_address', '192.0.2.55')->first();
+        $log = IpAuditLog::where('action', 'create')->where('entity_id', $ip->id)->first();
+        $this->assertNotNull($log);
+        $this->assertEquals(['ip_address', 'label', 'comment', 'owner_id'], array_keys($log->new_value));
+    }
+
+    public function test_destroy_audit_snapshot_contains_only_expected_keys(): void
+    {
+        $admin = User::factory()->create(['role' => 'super-admin']);
+        $ip = IpAddress::create(['ip_address' => '192.0.2.66', 'label' => 'Destroy Snap', 'owner_id' => $admin->id]);
+
+        $this->actingAs($admin, 'api')->deleteJson("/api/ip-addresses/{$ip->id}");
+
+        $log = IpAuditLog::where('action', 'delete')->where('entity_id', $ip->id)->first();
+        $this->assertNotNull($log);
+        $this->assertEquals(['ip_address', 'label', 'comment', 'owner_id'], array_keys($log->old_value));
+    }
 }
