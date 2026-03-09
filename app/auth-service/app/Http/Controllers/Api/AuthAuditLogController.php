@@ -61,7 +61,7 @@ class AuthAuditLogController extends Controller
         }
 
         if ($request->filled('session_id')) {
-            $query->where('session_id', $request->session_id);
+            $query->where('session_id', 'like', '%'.$request->session_id.'%');
         }
 
         $logs = $query->paginate(15);

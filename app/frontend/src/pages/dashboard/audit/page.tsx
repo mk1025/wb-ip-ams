@@ -32,15 +32,19 @@ export default function AuditLogPage() {
   });
 
   const debouncedAuthIpAddress = useDebounce(authFilter.ip_address, 400);
+  const debouncedAuthSessionId = useDebounce(authFilter.session_id, 400);
   const authQueryFilter: AuthAuditLogParams = {
     ...authFilter,
     ip_address: debouncedAuthIpAddress,
+    session_id: debouncedAuthSessionId,
   };
 
   const debouncedIpIpAddress = useDebounce(ipFilter.ip_address, 400);
+  const debouncedIpSessionId = useDebounce(ipFilter.session_id, 400);
   const ipQueryFilter: IpAuditLogParams = {
     ...ipFilter,
     ip_address: debouncedIpIpAddress,
+    session_id: debouncedIpSessionId,
   };
 
   const {
