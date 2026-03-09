@@ -21,7 +21,7 @@ return new class extends Migration
             $table->json('old_value')->nullable();
             $table->json('new_value')->nullable();
             $table->string('ip_address', 45)->nullable();
-            $table->string('user_agent')->nullable();
+            $table->text('user_agent')->nullable();
             $table->string('session_id')->nullable();
             $table->timestamp('created_at');
 
