@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
-use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
+use PHPOpenSourceSaver\JWTAuth\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -41,7 +41,9 @@ class AuthController extends Controller
         $this->syncUserToIpService($user);
 
         $sessionId = (string) Str::uuid();
-        $accessToken = JWTAuth::claims(['session_id' => $sessionId])->fromUser($user);
+        /** @var JWTAuth $jwt */
+        $jwt = app(JWTAuth::class);
+        $accessToken = $jwt->claims(['session_id' => $sessionId])->fromUser($user);
         $refreshToken = $this->createRefreshToken($user);
 
         $this->logAuthEvent($user, 'register', $request, $sessionId);
@@ -64,7 +66,9 @@ class AuthController extends Controller
         $this->syncUserToIpService($user);
 
         $sessionId = (string) Str::uuid();
-        $token = JWTAuth::claims(['session_id' => $sessionId])->fromUser($user);
+        /** @var JWTAuth $jwt */
+        $jwt = app(JWTAuth::class);
+        $token = $jwt->claims(['session_id' => $sessionId])->fromUser($user);
         $refreshToken = $this->createRefreshToken($user);
 
         // Log the login
@@ -84,7 +88,9 @@ class AuthController extends Controller
 
         $sessionId = null;
         try {
-            $raw = JWTAuth::parseToken()->getPayload()->get('session_id');
+            /** @var JWTAuth $jwt */
+            $jwt = app(JWTAuth::class);
+            $raw = $jwt->parseToken()->getPayload()->get('session_id');
             $sessionId = is_string($raw) ? $raw : null;
         } catch (\Throwable) {
             // session_id is best-effort; no token in context during testing
@@ -124,7 +130,9 @@ class AuthController extends Controller
         }
 
         $sessionId = (string) Str::uuid();
-        $newAccessToken = JWTAuth::claims(['session_id' => $sessionId])->fromUser($user);
+        /** @var JWTAuth $jwt */
+        $jwt = app(JWTAuth::class);
+        $newAccessToken = $jwt->claims(['session_id' => $sessionId])->fromUser($user);
 
         $this->logAuthEvent($user, 'token_refresh', $request, $sessionId);
 

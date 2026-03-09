@@ -14,7 +14,6 @@ use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
 class IpAddressController extends Controller
 {
@@ -212,7 +211,9 @@ class IpAddressController extends Controller
     {
         $sessionId = null;
         try {
-            $raw = JWTAuth::parseToken()->getPayload()->get('session_id');
+            /** @var \PHPOpenSourceSaver\JWTAuth\JWTAuth $jwt */
+            $jwt = app(\PHPOpenSourceSaver\JWTAuth\JWTAuth::class);
+            $raw = $jwt->parseToken()->getPayload()->get('session_id');
             $sessionId = is_string($raw) ? $raw : null;
         } catch (\Throwable) {
             // session_id is best-effort; no token in context during testing
