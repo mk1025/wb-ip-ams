@@ -8,6 +8,7 @@ use App\Models\AuthAuditLog;
 use App\Models\RefreshToken;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -443,5 +444,22 @@ class AuthTest extends TestCase
             ->getJson('/api/auth/audit-logs?date_to=2024-13-99');
 
         $response->assertStatus(422);
+    }
+
+    public function test_login_invalidates_audit_filter_caches(): void
+    {
+        $user = User::factory()->create(['password' => bcrypt('password')]);
+        $admin = User::factory()->create(['role' => 'super-admin']);
+
+        // Prime the caches
+        $this->actingAs($admin, 'api')->getJson('/api/auth/audit-logs');
+        $this->assertTrue(Cache::has('auth_audit_user_options'));
+
+        // Login should bust the caches
+        Http::fake(['*/api/internal/users/sync' => Http::response([], 200)]);
+        $this->postJson('/api/auth/login', ['email' => $user->email, 'password' => 'password']);
+
+        $this->assertFalse(Cache::has('auth_audit_user_options'));
+        $this->assertFalse(Cache::has('auth_audit_action_options'));
     }
 }

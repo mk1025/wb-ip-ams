@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
@@ -159,6 +160,9 @@ class AuthController extends Controller
             'session_id' => $sessionId,
             'created_at' => now(),
         ]);
+
+        Cache::forget('auth_audit_user_options');
+        Cache::forget('auth_audit_action_options');
     }
 
     private function syncUserToIpService(User $user): void

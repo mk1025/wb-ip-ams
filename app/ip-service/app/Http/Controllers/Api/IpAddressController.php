@@ -111,7 +111,9 @@ class IpAddressController extends Controller
 
         $ipAddress->setRelation('owner', $user);
 
-        $this->logAudit($user->id, 'create', $ipAddress->id, null, $ipAddress->toArray(), $request);
+        $snapshotKeys = ['ip_address', 'label', 'comment', 'owner_id'];
+
+        $this->logAudit($user->id, 'create', $ipAddress->id, null, $ipAddress->only($snapshotKeys), $request);
 
         Cache::forget('ip_address_owner_options');
         Cache::forget('ip_audit_user_options');
@@ -187,7 +189,7 @@ class IpAddressController extends Controller
             return $this->forbidden('Only super-admins can delete IP addresses');
         }
 
-        $oldValues = $ipAddress->toArray();
+        $oldValues = $ipAddress->only(['ip_address', 'label', 'comment', 'owner_id']);
 
         $ipAddress->delete();
 
