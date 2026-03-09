@@ -76,6 +76,26 @@ describe("StoreIpAddressRequest", () => {
       }).success,
     ).toBe(true);
   });
+
+  it("rejects a comment exceeding 1000 characters", () => {
+    expect(
+      StoreIpAddressRequest.safeParse({
+        ip_address: "10.0.0.1",
+        label: "Test",
+        comment: "a".repeat(1001),
+      }).success,
+    ).toBe(false);
+  });
+
+  it("accepts a comment of exactly 1000 characters", () => {
+    expect(
+      StoreIpAddressRequest.safeParse({
+        ip_address: "10.0.0.1",
+        label: "Test",
+        comment: "a".repeat(1000),
+      }).success,
+    ).toBe(true);
+  });
 });
 
 describe("UpdateIpAddressRequest", () => {
@@ -100,5 +120,14 @@ describe("UpdateIpAddressRequest", () => {
         comment: "New note",
       }).success,
     ).toBe(true);
+  });
+
+  it("rejects a comment exceeding 1000 characters on update", () => {
+    expect(
+      UpdateIpAddressRequest.safeParse({
+        label: "Updated",
+        comment: "a".repeat(1001),
+      }).success,
+    ).toBe(false);
   });
 });

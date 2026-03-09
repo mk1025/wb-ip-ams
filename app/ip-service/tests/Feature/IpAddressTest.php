@@ -303,6 +303,32 @@ class IpAddressTest extends TestCase
         $response->assertStatus(422);
     }
 
+    public function test_store_returns_422_for_comment_exceeding_max_length(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user, 'api')->postJson('/api/ip-addresses', [
+            'ip_address' => '203.0.113.50',
+            'label' => 'Max Comment',
+            'comment' => str_repeat('a', 1001),
+        ]);
+
+        $response->assertStatus(422);
+    }
+
+    public function test_update_returns_422_for_comment_exceeding_max_length(): void
+    {
+        $user = User::factory()->create();
+        $ip = IpAddress::create(['ip_address' => '203.0.113.51', 'label' => 'Base', 'owner_id' => $user->id]);
+
+        $response = $this->actingAs($user, 'api')->putJson("/api/ip-addresses/{$ip->id}", [
+            'label' => 'Updated',
+            'comment' => str_repeat('a', 1001),
+        ]);
+
+        $response->assertStatus(422);
+    }
+
     public function test_store_creates_audit_log_with_create_action(): void
     {
         $user = User::factory()->create();

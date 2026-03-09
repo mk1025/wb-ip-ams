@@ -12,7 +12,10 @@ export const StoreIpAddressRequest = z.object({
     .string()
     .min(1, "Label is required")
     .max(255, "Label must not exceed 255 characters"),
-  comment: z.string().optional(),
+  comment: z
+    .string()
+    .max(1000, "Comment must not exceed 1000 characters")
+    .optional(),
 });
 
 export const UpdateIpAddressRequest = z.object({
@@ -20,5 +23,8 @@ export const UpdateIpAddressRequest = z.object({
     .string()
     .min(1, "Label is required")
     .max(255, "Label must not exceed 255 characters"),
-  comment: z.string().optional(),
+  comment: z
+    .string()
+    .max(1000, "Comment must not exceed 1000 characters")
+    .optional(),
 });

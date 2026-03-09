@@ -39,6 +39,7 @@ class StoreIpAddressRequest extends FormRequest
             'comment' => [
                 'nullable',
                 'string',
+                'max:1000',
             ],
         ];
     }
@@ -50,6 +51,7 @@ class StoreIpAddressRequest extends FormRequest
             'ip_address.unique' => 'This IP address already exists',
             'label.required' => 'Label is required',
             'label.max' => 'Label must not exceed 255 characters',
+            'comment.max' => 'Comment must not exceed 1000 characters',
         ];
     }
 }
