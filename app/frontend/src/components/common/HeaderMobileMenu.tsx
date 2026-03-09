@@ -27,7 +27,7 @@ export default function HeaderMobileMenu() {
   const { mutateAsync: logout, isPending } = useLogoutMutation();
 
   async function handleLogout() {
-    await logout().then(() => navigate("/login"));
+    await logout().finally(() => navigate("/login"));
   }
 
   const navItems = useMemo(() => getNavItems(isAdmin), [isAdmin]);

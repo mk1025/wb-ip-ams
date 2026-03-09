@@ -15,7 +15,7 @@ export default function DashboardLayout() {
   const { mutateAsync: logout, isPending } = useLogoutMutation();
 
   async function handleLogout() {
-    await logout().then(() => navigate("/login"));
+    await logout().finally(() => navigate("/login"));
   }
 
   const isAdmin = user?.role === "super-admin";
