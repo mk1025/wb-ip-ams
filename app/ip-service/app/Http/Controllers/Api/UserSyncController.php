@@ -33,7 +33,14 @@ class UserSyncController extends Controller
         if (! $user->exists) {
             $user->password = Hash::make('not-used');
         }
-        $user->save();
+        try {
+            $user->save();
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() === '23000') {
+                return $this->error('Email already assigned to a different user ID.', 422);
+            }
+            throw $e;
+        }
 
         return $this->success($user, 'User synced successfully');
     }
