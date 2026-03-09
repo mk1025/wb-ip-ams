@@ -134,9 +134,6 @@ export function useLogoutMutation(): UseMutationResult<
       });
     },
     onSuccess: (data) => {
-      localStorage.removeItem("refresh_token");
-      clearAuth();
-
       const message = data.message || "Logout successful!";
 
       toast.success(message, {
@@ -149,6 +146,10 @@ export function useLogoutMutation(): UseMutationResult<
         id: toastId,
         description: getApiErrorMessage(error),
       });
+    },
+    onSettled: () => {
+      localStorage.removeItem("refresh_token");
+      clearAuth();
     },
   });
 }
