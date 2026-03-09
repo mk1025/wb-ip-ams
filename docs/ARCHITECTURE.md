@@ -42,9 +42,20 @@ Every successful `login`, `register`, and `token_refresh` call:
 
 The access token expires after **60 minutes** by default (configurable via `JWT_TTL`). When it expires, the client exchanges the refresh token for a new access token via `POST /auth/refresh`, which also generates a new `session_id` — starting a new auditable session.
 
+### Asymmetric signing (RS256)
+
+Tokens are signed with **RS256** (RSA + SHA-256) using a 4096-bit key pair:
+
+- The **Auth Service** holds the **private key** and is the only service that can issue tokens.
+- The **IP Service** holds only the **public key** — it can verify tokens but can never forge one.
+
+This is a meaningful security boundary: even if the IP Service were compromised, an attacker would gain no ability to mint valid JWTs. With a shared HMAC secret (HS256), any service holding the secret could forge tokens for any user.
+
+The keys are stored as base64-encoded PEM strings in environment variables (`JWT_PRIVATE_KEY` / `JWT_PUBLIC_KEY`). The `config/jwt.php` in each service base64-decodes them before passing to the library. The IP Service's config sets `keys.private` to the public key value as a placeholder — the underlying `php-open-source-saver/jwt-auth` library requires both keys to be non-null for asymmetric algorithms, but only ever calls `getSigningKey()` (private) during token encoding, which the IP Service never does.
+
 ### Cross-service JWT validation
 
-Both Auth and IP services share the same `JWT_SECRET` environment variable. Either service can independently validate any token issued by Auth without a network call. The IP Service uses the `auth:api` middleware (backed by `php-open-source-saver/jwt-auth`) on all its routes — the same library and the same secret.
+Both Auth and IP services use `php-open-source-saver/jwt-auth` backed by the same public key. Either service can independently validate any token without a network call. The IP Service uses the `auth:api` middleware on all its routes.
 
 ### Session ID propagation
 

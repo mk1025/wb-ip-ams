@@ -34,7 +34,7 @@ All client traffic flows through a single **Gateway** service, which proxies req
 
 ## Features
 
-- **JWT Authentication** — Login, registration, logout, and automatic token refresh via a separate refresh token
+- **JWT Authentication (RS256)** — Asymmetric signing: Auth Service signs with a private key, IP Service verifies with the public key only — a compromised IP Service cannot forge tokens
 - **IP Address Management** — Full CRUD for IPv4/IPv6 records with a label and optional comment
 - **Role-Based Access Control** — Users manage their own IPs; super-admins can modify or delete any record
 - **Immutable Audit Logs** — Append-only logs for all auth events and IP changes; deletion is blocked at the model level
@@ -54,17 +54,24 @@ git clone <repo-url>
 cd wb-ip-ams
 ```
 
-### 2. Set the shared JWT secret
+### 2. Generate the RSA key pair
 
-Both the Auth and IP services must share the same secret to validate tokens. Set it before starting Docker:
+Tokens are signed with **RS256**. The Auth Service holds the private key (signs tokens); the IP Service holds only the public key (verifies but cannot forge tokens).
 
 ```bash
-# Option A — export in your shell
-export JWT_SECRET=$(openssl rand -base64 64 | tr -d '\n')
+# 1. Generate a 4096-bit key pair
+openssl genrsa -out private.pem 4096
+openssl rsa -in private.pem -pubout -out public.pem
 
-# Option B — create a .env file at the project root
-echo "JWT_SECRET=$(openssl rand -base64 64 | tr -d '\n')" > .env
+# 2. Base64-encode them and write to the root .env (read by docker-compose)
+echo "JWT_PRIVATE_KEY=$(base64 -w 0 private.pem)" >> .env
+echo "JWT_PUBLIC_KEY=$(base64 -w 0 public.pem)" >> .env
+
+# 3. Delete the raw PEM files — the encoded values in .env are all you need
+rm private.pem public.pem
 ```
+
+> The root `.env` is already in `.gitignore`. Never commit your private key.
 
 ### 3. Build and start
 
@@ -97,7 +104,7 @@ docker compose up --build
 ```bash
 cd app/auth-service
 composer install
-cp .env.example .env          # then set DB_*, JWT_SECRET
+cp .env.example .env          # set DB_*, JWT_ALGO=RS256, JWT_PRIVATE_KEY, JWT_PUBLIC_KEY
 php artisan key:generate
 php artisan migrate --seed
 php artisan serve --port=8000
@@ -108,7 +115,7 @@ php artisan serve --port=8000
 ```bash
 cd app/ip-service
 composer install
-cp .env.example .env          # then set DB_*, JWT_SECRET (must match auth-service)
+cp .env.example .env          # set DB_*, JWT_ALGO=RS256, JWT_PUBLIC_KEY (public key only — no private key)
 php artisan key:generate
 php artisan migrate --seed
 php artisan serve --port=8001
@@ -131,7 +138,11 @@ php artisan serve --port=3000
 # From the project root
 pnpm install
 pnpm --filter @wb-ip-ams/shared-types run build
-VITE_API_BASE_URL=http://localhost:3000/api pnpm --filter frontend run dev
+
+# Copy the frontend env file (sets VITE_API_BASE_URL)
+cp app/frontend/.env.example app/frontend/.env
+
+pnpm --filter frontend run dev
 ```
 
 ---
