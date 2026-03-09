@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserSyncController extends Controller
 {
@@ -30,7 +31,7 @@ class UserSyncController extends Controller
             'role' => $validated['role'],
         ]);
         if (! $user->exists) {
-            $user->password = bcrypt('not-used');
+            $user->password = Hash::make('not-used');
         }
         $user->save();
 
