@@ -28,8 +28,8 @@ class AuthAuditLogController extends Controller
         }
 
         $allowed = ['action', 'user_id', 'ip_address', 'created_at'];
-        $sortBy = in_array($request->sortBy, $allowed) ? $request->sortBy : 'created_at';
-        $sortDir = $request->sortDir === 'asc' ? 'asc' : 'desc';
+        $sortBy = in_array($request->input('sort_by'), $allowed) ? $request->input('sort_by') : 'created_at';
+        $sortDir = $request->input('sort_dir') === 'asc' ? 'asc' : 'desc';
 
         $query = AuthAuditLog::with('user:id,email')->orderBy($sortBy, $sortDir);
 

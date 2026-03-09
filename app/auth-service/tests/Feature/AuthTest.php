@@ -403,7 +403,7 @@ class AuthTest extends TestCase
         AuthAuditLog::create(['user_id' => $user->id, 'action' => 'login', 'created_at' => now()]);
 
         $response = $this->actingAs($admin, 'api')
-            ->getJson("/api/auth/audit-logs?sortBy=action&sortDir=asc&user_id={$user->id}");
+            ->getJson("/api/auth/audit-logs?sort_by=action&sort_dir=asc&user_id={$user->id}");
 
         $response->assertStatus(200);
         $actions = collect($response->json('data.logs.data'))->pluck('action')->all();
@@ -418,7 +418,7 @@ class AuthTest extends TestCase
         $log2 = AuthAuditLog::create(['user_id' => $user->id, 'action' => 'logout', 'created_at' => now()]);
 
         $response = $this->actingAs($admin, 'api')
-            ->getJson("/api/auth/audit-logs?sortBy=invalid_column__injection&user_id={$user->id}");
+            ->getJson("/api/auth/audit-logs?sort_by=invalid_column__injection&user_id={$user->id}");
 
         $response->assertStatus(200);
         $ids = collect($response->json('data.logs.data'))->pluck('id')->all();

@@ -22,8 +22,8 @@ export default function AuditLogPage() {
 
   const [authFilter, setAuthFilter] = useState<AuthAuditLogParams>({
     page: 1,
-    sortBy: "created_at",
-    sortDir: "desc",
+    sort_by: "created_at",
+    sort_dir: "desc",
   });
   const [ipFilter, setIpFilter] = useState<IpAuditLogParams>({
     page: 1,

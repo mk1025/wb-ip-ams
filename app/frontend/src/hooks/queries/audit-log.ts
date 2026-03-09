@@ -22,8 +22,8 @@ export interface AuthAuditLogParams {
   session_id?: string;
   date_from?: string;
   date_to?: string;
-  sortBy?: "action" | "user_id" | "ip_address" | "created_at";
-  sortDir?: "asc" | "desc";
+  sort_by?: "action" | "user_id" | "ip_address" | "created_at";
+  sort_dir?: "asc" | "desc";
 }
 
 export interface IpAuditLogParams {
