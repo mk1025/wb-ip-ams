@@ -180,4 +180,21 @@ describe("useLogoutMutation", () => {
     expect(useAuthStore.getState().accessToken).toBeNull();
     expect(useAuthStore.getState().user).toBeNull();
   });
+
+  it("on error: still removes refresh_token from localStorage and clears auth store", async () => {
+    mockPost.mockRejectedValue(new Error("Network error"));
+
+    const { result } = renderHook(() => useLogoutMutation(), {
+      wrapper: makeWrapper(),
+    });
+
+    result.current.mutate();
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(localStorage.getItem("refresh_token")).toBeNull();
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
+    expect(useAuthStore.getState().accessToken).toBeNull();
+    expect(useAuthStore.getState().user).toBeNull();
+  });
 });
