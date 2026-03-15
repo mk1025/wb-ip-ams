@@ -4,28 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Models\AuthAuditLog;
 use App\Models\RefreshToken;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
-use Tests\TestCase;
 
-class AuthTest extends TestCase
+class AuthTest extends AuthFeatureTestCase
 {
-    use RefreshDatabase;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        // Prevent real HTTP calls to ip-service during register/login
-        Http::fake();
-    }
-
     public function test_register_returns_201_with_user_and_tokens(): void
     {
-        $response = $this->postJson('/api/auth/register', [
+        $response = $this->postJson(self::REGISTER_URL, [
             'email' => 'newuser@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
@@ -51,7 +37,7 @@ class AuthTest extends TestCase
 
     public function test_register_returns_422_for_missing_email(): void
     {
-        $response = $this->postJson('/api/auth/register', [
+        $response = $this->postJson(self::REGISTER_URL, [
             'password' => 'password123',
             'password_confirmation' => 'password123',
         ]);
@@ -61,7 +47,7 @@ class AuthTest extends TestCase
 
     public function test_register_returns_422_for_missing_password(): void
     {
-        $response = $this->postJson('/api/auth/register', [
+        $response = $this->postJson(self::REGISTER_URL, [
             'email' => 'newuser@example.com',
         ]);
 
@@ -70,7 +56,7 @@ class AuthTest extends TestCase
 
     public function test_register_returns_422_for_invalid_email_format(): void
     {
-        $response = $this->postJson('/api/auth/register', [
+        $response = $this->postJson(self::REGISTER_URL, [
             'email' => 'not-a-valid-email',
             'password' => 'password123',
             'password_confirmation' => 'password123',
@@ -83,7 +69,7 @@ class AuthTest extends TestCase
     {
         User::factory()->create(['email' => 'taken@example.com']);
 
-        $response = $this->postJson('/api/auth/register', [
+        $response = $this->postJson(self::REGISTER_URL, [
             'email' => 'taken@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
@@ -94,24 +80,13 @@ class AuthTest extends TestCase
 
     public function test_register_returns_422_for_password_too_short(): void
     {
-        $response = $this->postJson('/api/auth/register', [
+        $response = $this->postJson(self::REGISTER_URL, [
             'email' => 'newuser@example.com',
             'password' => 'short',
             'password_confirmation' => 'short',
         ]);
 
         $response->assertStatus(422);
-    }
-
-    public function test_register_creates_audit_log_entry(): void
-    {
-        $this->postJson('/api/auth/register', [
-            'email' => 'newuser@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
-        ]);
-
-        $this->assertDatabaseHas('auth_audit_logs', ['action' => 'register']);
     }
 
     public function test_login_returns_200_with_tokens_on_valid_credentials(): void
@@ -121,7 +96,7 @@ class AuthTest extends TestCase
             'password' => bcrypt('secret1234'),
         ]);
 
-        $response = $this->postJson('/api/auth/login', [
+        $response = $this->postJson(self::LOGIN_URL, [
             'email' => 'user@example.com',
             'password' => 'secret1234',
         ]);
@@ -149,7 +124,7 @@ class AuthTest extends TestCase
             'password' => bcrypt('correct-password'),
         ]);
 
-        $response = $this->postJson('/api/auth/login', [
+        $response = $this->postJson(self::LOGIN_URL, [
             'email' => 'user@example.com',
             'password' => 'wrong-password',
         ]);
@@ -157,9 +132,9 @@ class AuthTest extends TestCase
         $response->assertStatus(401);
     }
 
-    public function test_login_returns_401_for_nonexistent_email(): void
+    public function test_login_returns_401_for_invalid_credentials(): void
     {
-        $response = $this->postJson('/api/auth/login', [
+        $response = $this->postJson(self::LOGIN_URL, [
             'email' => 'nobody@example.com',
             'password' => 'password123',
         ]);
@@ -171,27 +146,12 @@ class AuthTest extends TestCase
     {
         $user = User::factory()->create(['password' => bcrypt('secret1234')]);
 
-        $this->postJson('/api/auth/login', [
+        $this->postJson(self::LOGIN_URL, [
             'email' => $user->email,
             'password' => 'secret1234',
         ]);
 
         $this->assertDatabaseHas('refresh_tokens', ['user_id' => $user->id]);
-    }
-
-    public function test_login_creates_audit_log_entry(): void
-    {
-        $user = User::factory()->create(['password' => bcrypt('secret1234')]);
-
-        $this->postJson('/api/auth/login', [
-            'email' => $user->email,
-            'password' => 'secret1234',
-        ]);
-
-        $this->assertDatabaseHas('auth_audit_logs', [
-            'user_id' => $user->id,
-            'action' => 'login',
-        ]);
     }
 
     public function test_logout_returns_200_and_deletes_refresh_tokens(): void
@@ -203,7 +163,7 @@ class AuthTest extends TestCase
             'expires_at' => now()->addDays(30),
         ]);
 
-        $response = $this->actingAs($user, 'api')->postJson('/api/auth/logout');
+        $response = $this->actingAs($user, 'api')->postJson(self::LOGOUT_URL);
 
         $response->assertStatus(200)->assertJsonPath('success', true);
         $this->assertDatabaseMissing('refresh_tokens', ['user_id' => $user->id]);
@@ -211,38 +171,26 @@ class AuthTest extends TestCase
 
     public function test_logout_returns_401_for_unauthenticated_request(): void
     {
-        $response = $this->postJson('/api/auth/logout');
+        $response = $this->postJson(self::LOGOUT_URL);
 
         $response->assertStatus(401);
     }
 
-    public function test_logout_creates_audit_log_entry(): void
-    {
-        $user = User::factory()->create();
-
-        $this->actingAs($user, 'api')->postJson('/api/auth/logout');
-
-        $this->assertDatabaseHas('auth_audit_logs', [
-            'user_id' => $user->id,
-            'action' => 'logout',
-        ]);
-    }
-
     public function test_me_returns_authenticated_user_data(): void
     {
-        $user = User::factory()->create(['email' => 'iam@example.com', 'role' => 'user']);
+        $user = User::factory()->create(['email' => 'iam@example.com', 'role' => User::ROLE_USER]);
 
-        $response = $this->actingAs($user, 'api')->getJson('/api/auth/me');
+        $response = $this->actingAs($user, 'api')->getJson(self::ME_URL);
 
         $response->assertStatus(200)
             ->assertJsonPath('success', true)
             ->assertJsonPath('data.email', 'iam@example.com')
-            ->assertJsonPath('data.role', 'user');
+            ->assertJsonPath('data.role', User::ROLE_USER);
     }
 
     public function test_me_returns_401_for_unauthenticated_request(): void
     {
-        $response = $this->getJson('/api/auth/me');
+        $response = $this->getJson(self::ME_URL);
 
         $response->assertStatus(401);
     }
@@ -256,7 +204,7 @@ class AuthTest extends TestCase
             'expires_at' => now()->addDays(30),
         ]);
 
-        $response = $this->postJson('/api/auth/refresh', [
+        $response = $this->postJson(self::REFRESH_URL, [
             'refresh_token' => $refreshToken->token,
         ]);
 
@@ -274,7 +222,7 @@ class AuthTest extends TestCase
             'expires_at' => now()->addDays(30),
         ]);
 
-        $this->postJson('/api/auth/refresh', [
+        $this->postJson(self::REFRESH_URL, [
             'refresh_token' => $refreshToken->token,
         ]);
 
@@ -283,7 +231,7 @@ class AuthTest extends TestCase
 
     public function test_refresh_returns_401_for_invalid_token(): void
     {
-        $response = $this->postJson('/api/auth/refresh', [
+        $response = $this->postJson(self::REFRESH_URL, [
             'refresh_token' => 'completely-bogus-token-that-does-not-exist',
         ]);
 
@@ -299,7 +247,7 @@ class AuthTest extends TestCase
             'expires_at' => now()->subDay(), // expired yesterday
         ]);
 
-        $response = $this->postJson('/api/auth/refresh', [
+        $response = $this->postJson(self::REFRESH_URL, [
             'refresh_token' => $refreshToken->token,
         ]);
 
@@ -308,158 +256,8 @@ class AuthTest extends TestCase
 
     public function test_refresh_returns_422_for_missing_refresh_token_field(): void
     {
-        $response = $this->postJson('/api/auth/refresh', []);
+        $response = $this->postJson(self::REFRESH_URL, []);
 
         $response->assertStatus(422);
-    }
-
-    public function test_audit_logs_returns_200_with_paginated_data_for_super_admin(): void
-    {
-        $admin = User::factory()->create(['role' => 'super-admin']);
-
-        $response = $this->actingAs($admin, 'api')->getJson('/api/auth/audit-logs');
-
-        $response->assertStatus(200)
-            ->assertJsonPath('success', true)
-            ->assertJsonStructure([
-                'data' => [
-                    'logs' => ['data', 'current_page', 'total'],
-                    'filter_options' => ['users', 'actions'],
-                ],
-            ]);
-    }
-
-    public function test_audit_logs_returns_403_for_regular_user(): void
-    {
-        $user = User::factory()->create(['role' => 'user']);
-
-        $response = $this->actingAs($user, 'api')->getJson('/api/auth/audit-logs');
-
-        $response->assertStatus(403);
-    }
-
-    public function test_audit_logs_returns_401_for_unauthenticated_request(): void
-    {
-        $response = $this->getJson('/api/auth/audit-logs');
-
-        $response->assertStatus(401);
-    }
-
-    public function test_audit_logs_filters_by_action(): void
-    {
-        $admin = User::factory()->create(['role' => 'super-admin']);
-        $user = User::factory()->create();
-        AuthAuditLog::create(['user_id' => $user->id, 'action' => 'login', 'created_at' => now()]);
-        AuthAuditLog::create(['user_id' => $user->id, 'action' => 'logout', 'created_at' => now()]);
-
-        $response = $this->actingAs($admin, 'api')
-            ->getJson('/api/auth/audit-logs?action=login');
-
-        $response->assertStatus(200);
-        $logs = collect($response->json('data.logs.data'));
-        $this->assertNotEmpty($logs);
-        $this->assertTrue($logs->every(fn ($l) => $l['action'] === 'login'));
-    }
-
-    public function test_audit_logs_filters_by_user_id(): void
-    {
-        $admin = User::factory()->create(['role' => 'super-admin']);
-        $user1 = User::factory()->create();
-        $user2 = User::factory()->create();
-        AuthAuditLog::create(['user_id' => $user1->id, 'action' => 'login', 'created_at' => now()]);
-        AuthAuditLog::create(['user_id' => $user2->id, 'action' => 'login', 'created_at' => now()]);
-
-        $response = $this->actingAs($admin, 'api')
-            ->getJson("/api/auth/audit-logs?user_id={$user1->id}");
-
-        $response->assertStatus(200);
-        $logs = collect($response->json('data.logs.data'));
-        $this->assertNotEmpty($logs);
-        $this->assertTrue($logs->every(fn ($l) => $l['user_id'] === $user1->id));
-    }
-
-    public function test_audit_logs_defaults_to_created_at_desc(): void
-    {
-        $admin = User::factory()->create(['role' => 'super-admin']);
-        $user = User::factory()->create();
-
-        $log1 = AuthAuditLog::create(['user_id' => $user->id, 'action' => 'login', 'created_at' => now()->subHours(2)]);
-        $log2 = AuthAuditLog::create(['user_id' => $user->id, 'action' => 'logout', 'created_at' => now()->subHour()]);
-        $log3 = AuthAuditLog::create(['user_id' => $user->id, 'action' => 'register', 'created_at' => now()]);
-
-        $response = $this->actingAs($admin, 'api')->getJson("/api/auth/audit-logs?user_id={$user->id}");
-
-        $response->assertStatus(200);
-        $ids = collect($response->json('data.logs.data'))->pluck('id')->all();
-
-        $this->assertEquals([$log3->id, $log2->id, $log1->id], $ids);
-    }
-
-    public function test_audit_logs_sorts_by_action_asc(): void
-    {
-        $admin = User::factory()->create(['role' => 'super-admin']);
-        $user = User::factory()->create();
-
-        AuthAuditLog::create(['user_id' => $user->id, 'action' => 'logout', 'created_at' => now()]);
-        AuthAuditLog::create(['user_id' => $user->id, 'action' => 'login', 'created_at' => now()]);
-
-        $response = $this->actingAs($admin, 'api')
-            ->getJson("/api/auth/audit-logs?sort_by=action&sort_dir=asc&user_id={$user->id}");
-
-        $response->assertStatus(200);
-        $actions = collect($response->json('data.logs.data'))->pluck('action')->all();
-        $this->assertEquals(['login', 'logout'], $actions);
-    }
-
-    public function test_audit_logs_falls_back_to_default_sort_for_non_allowlisted_column(): void
-    {
-        $admin = User::factory()->create(['role' => 'super-admin']);
-        $user = User::factory()->create();
-        $log1 = AuthAuditLog::create(['user_id' => $user->id, 'action' => 'login', 'created_at' => now()->subHour()]);
-        $log2 = AuthAuditLog::create(['user_id' => $user->id, 'action' => 'logout', 'created_at' => now()]);
-
-        $response = $this->actingAs($admin, 'api')
-            ->getJson("/api/auth/audit-logs?sort_by=invalid_column__injection&user_id={$user->id}");
-
-        $response->assertStatus(200);
-        $ids = collect($response->json('data.logs.data'))->pluck('id')->all();
-        $this->assertEquals([$log2->id, $log1->id], $ids);
-    }
-
-    public function test_audit_logs_returns_422_for_invalid_date_from(): void
-    {
-        $admin = User::factory()->create(['role' => 'super-admin']);
-
-        $response = $this->actingAs($admin, 'api')
-            ->getJson('/api/auth/audit-logs?date_from=not-a-date');
-
-        $response->assertStatus(422);
-    }
-
-    public function test_audit_logs_returns_422_for_invalid_date_to(): void
-    {
-        $admin = User::factory()->create(['role' => 'super-admin']);
-
-        $response = $this->actingAs($admin, 'api')
-            ->getJson('/api/auth/audit-logs?date_to=2024-13-99');
-
-        $response->assertStatus(422);
-    }
-
-    public function test_login_invalidates_audit_filter_caches(): void
-    {
-        $user = User::factory()->create(['password' => bcrypt('password')]);
-        $admin = User::factory()->create(['role' => 'super-admin']);
-
-        // Prime the caches
-        $this->actingAs($admin, 'api')->getJson('/api/auth/audit-logs');
-        $this->assertTrue(Cache::has('auth_audit_user_options'));
-
-        // Login should bust the caches
-        Http::fake(['*/api/internal/users/sync' => Http::response([], 200)]);
-        $this->postJson('/api/auth/login', ['email' => $user->email, 'password' => 'password']);
-
-        $this->assertFalse(Cache::has('auth_audit_user_options'));
-        $this->assertFalse(Cache::has('auth_audit_action_options'));
     }
 }
