@@ -11,8 +11,8 @@ use App\Models\RefreshToken;
 use App\Models\User;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class AuthService
@@ -24,103 +24,76 @@ class AuthService
     /**
      * @param  array<string, mixed>  $data
      */
-    public function registerUser(array $data): JsonResponse
+    public function registerUser(array $data, Request $request): JsonResponse
     {
-        try {
-            $request = request();
 
-            $user = User::create([
-                'email' => $data['email'],
-                'password' => Hash::make($data['password']),
-                'role' => User::ROLE_USER,
-            ]);
+        $user = User::create([
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+            'role' => User::ROLE_USER,
+        ]);
 
-            $this->userSyncService->syncUserToIpService($user);
+        $this->userSyncService->syncUserToIpService($user);
 
-            $sessionId = (string) Str::uuid();
+        $sessionId = (string) Str::uuid();
 
-            $accessToken = $this->tokenService->createAccessToken($user, $sessionId);
-            $refreshToken = $this->tokenService->createRefreshToken($user);
+        $accessToken = $this->tokenService->createAccessToken($user, $sessionId);
+        $refreshToken = $this->tokenService->createRefreshToken($user);
 
-            $this->logService->logAuthEvent($user, AuthAuditLog::ACTION_REGISTER, $request, $sessionId);
+        $this->logService->logAuthEvent($user, AuthAuditLog::ACTION_REGISTER, $request, $sessionId);
 
-            $resource = new AuthResource($user, $accessToken, $refreshToken->token);
+        $resource = new AuthResource($user, $accessToken, $refreshToken->token);
 
-            return $this->created($resource);
-        } catch (\Throwable $th) {
-            Log::error('Error registering user: '.$th->getMessage());
+        return $this->created($resource);
 
-            throw $th;
-        }
     }
 
-    public function loginUser(User $user): JsonResponse
+    public function loginUser(User $user, Request $request): JsonResponse
     {
-        try {
-            $request = request();
+        $this->userSyncService->syncUserToIpService($user);
 
-            $this->userSyncService->syncUserToIpService($user);
+        $sessionId = (string) Str::uuid();
 
-            $sessionId = (string) Str::uuid();
+        $accessToken = $this->tokenService->createAccessToken($user, $sessionId);
+        $refreshToken = $this->tokenService->createRefreshToken($user);
 
-            $accessToken = $this->tokenService->createAccessToken($user, $sessionId);
-            $refreshToken = $this->tokenService->createRefreshToken($user);
+        $this->logService->logAuthEvent($user, AuthAuditLog::ACTION_LOGIN, $request, $sessionId);
 
-            $this->logService->logAuthEvent($user, AuthAuditLog::ACTION_LOGIN, $request, $sessionId);
+        $resource = new AuthResource($user, $accessToken, $refreshToken->token);
 
-            $resource = new AuthResource($user, $accessToken, $refreshToken->token);
+        return $this->success($resource);
 
-            return $this->success($resource);
-        } catch (\Throwable $th) {
-            Log::error('Error logging in user: '.$th->getMessage());
-
-            throw $th;
-        }
     }
 
-    public function logoutUser(): JsonResponse
+    public function logoutUser(Request $request): JsonResponse
     {
-        try {
-            $request = request();
+        /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
+        $guard = auth('api');
+        $user = $guard->user();
 
-            /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
-            $guard = auth('api');
-            $user = $guard->user();
+        $sessionId = $this->tokenService->getJWTSessionId();
 
-            $sessionId = $this->tokenService->getJWTSessionId();
+        RefreshToken::where('user_id', $user->id)->delete();
 
-            RefreshToken::where('user_id', $user->id)->delete();
+        $this->logService->logAuthEvent($user, AuthAuditLog::ACTION_LOGOUT, $request, $sessionId);
 
-            $this->logService->logAuthEvent($user, AuthAuditLog::ACTION_LOGOUT, $request, $sessionId);
+        $guard->logout();
 
-            $guard->logout();
+        return $this->success(null, 'Successfully logged out');
 
-            return $this->success(null, 'Successfully logged out');
-        } catch (\Throwable $th) {
-            Log::error('Error during logout: '.$th->getMessage());
-
-            throw $th;
-        }
     }
 
-    public function refreshToken(User $user): JsonResponse
+    public function refreshToken(User $user, Request $request): JsonResponse
     {
-        try {
-            $request = request();
+        $sessionId = (string) Str::uuid();
 
-            $sessionId = (string) Str::uuid();
+        $newAccessToken = $this->tokenService->createAccessToken($user, $sessionId);
 
-            $newAccessToken = $this->tokenService->createAccessToken($user, $sessionId);
+        $this->logService->logAuthEvent($user, AuthAuditLog::ACTION_TOKEN_REFRESH, $request, $sessionId);
 
-            $this->logService->logAuthEvent($user, AuthAuditLog::ACTION_TOKEN_REFRESH, $request, $sessionId);
+        $resource = new TokenResource($newAccessToken);
 
-            $resource = new TokenResource($newAccessToken);
+        return $this->success($resource);
 
-            return $this->success($resource);
-        } catch (\Throwable $th) {
-            Log::error('Error refreshing token: '.$th->getMessage());
-
-            throw $th;
-        }
     }
 }

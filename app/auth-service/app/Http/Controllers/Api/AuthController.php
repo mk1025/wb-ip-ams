@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Services\AuthService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
@@ -28,7 +29,7 @@ class AuthController extends Controller
         try {
             $validated = $request->validated();
 
-            return $this->authService->registerUser($validated);
+            return $this->authService->registerUser($validated, $request);
         } catch (\Throwable $th) {
             Log::error('Error registering user: '.$th->getMessage());
 
@@ -37,7 +38,6 @@ class AuthController extends Controller
 
     }
 
-    // Login user
     public function login(LoginRequest $request): JsonResponse
     {
         try {
@@ -47,7 +47,7 @@ class AuthController extends Controller
                 return $this->unauthorized('Invalid credentials');
             }
 
-            return $this->authService->loginUser($user);
+            return $this->authService->loginUser($user, $request);
         } catch (\Throwable $th) {
             Log::error('Error logging in user: '.$th->getMessage());
 
@@ -55,11 +55,10 @@ class AuthController extends Controller
         }
     }
 
-    // Logout user
-    public function logout(): JsonResponse
+    public function logout(Request $request): JsonResponse
     {
         try {
-            return $this->authService->logoutUser();
+            return $this->authService->logoutUser($request);
         } catch (\Throwable $th) {
             Log::error('Error during logout: '.$th->getMessage());
 
@@ -67,7 +66,6 @@ class AuthController extends Controller
         }
     }
 
-    // Get authenticated user
     public function me(): JsonResponse
     {
         try {
@@ -90,7 +88,6 @@ class AuthController extends Controller
 
     }
 
-    // Refresh access token using refresh token
     public function refresh(RefreshTokenRequest $request): JsonResponse
     {
         try {
@@ -106,7 +103,7 @@ class AuthController extends Controller
                 return $this->notFound('User not found');
             }
 
-            return $this->authService->refreshToken($user);
+            return $this->authService->refreshToken($user, $request);
         } catch (\Throwable $th) {
             Log::error('Error refreshing token: '.$th->getMessage());
 
