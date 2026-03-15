@@ -17,6 +17,10 @@ class AuthAuditLogService
 {
     use ApiResponseTrait;
 
+    public const CACHE_KEY_USER_OPTIONS = 'auth_audit_user_options';
+
+    public const CACHE_KEY_ACTION_OPTIONS = 'auth_audit_action_options';
+
     private const ALLOWED_COLUMNS = ['action', 'user_id', 'ip_address', 'created_at'];
 
     private const PAGINATION_SIZE = 15;
@@ -32,8 +36,8 @@ class AuthAuditLogService
             'created_at' => now(),
         ]);
 
-        Cache::forget('auth_audit_user_options');
-        Cache::forget('auth_audit_action_options');
+        Cache::forget(self::CACHE_KEY_USER_OPTIONS);
+        Cache::forget(self::CACHE_KEY_ACTION_OPTIONS);
     }
 
     public function getAuthAuditLogs(Request $request): JsonResponse
@@ -120,7 +124,7 @@ class AuthAuditLogService
     private function getActionFilterOptions(): array
     {
         try {
-            return Cache::remember('auth_audit_action_options', 60, function () {
+            return Cache::remember(self::CACHE_KEY_ACTION_OPTIONS, 60, function () {
                 return AuthAuditLog::pluck('action')
                     ->countBy()
                     ->sortDesc()
