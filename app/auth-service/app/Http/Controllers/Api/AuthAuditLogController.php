@@ -21,9 +21,7 @@ class AuthAuditLogController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
-            $guard = auth('api');
-            $user = $guard->user();
+            $user = $request->user();
 
             if ($user->role !== User::ROLE_SUPER_ADMIN) {
                 return $this->forbidden('Only super-admins can view audit logs');

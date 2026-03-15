@@ -58,7 +58,9 @@ class AuthController extends Controller
     public function logout(Request $request): JsonResponse
     {
         try {
-            return $this->authService->logoutUser($request);
+            $user = $request->user();
+
+            return $this->authService->logoutUser($user, $request);
         } catch (\Throwable $th) {
             Log::error('Error during logout: '.$th->getMessage());
 
@@ -66,16 +68,10 @@ class AuthController extends Controller
         }
     }
 
-    public function me(): JsonResponse
+    public function me(Request $request): JsonResponse
     {
         try {
-            /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
-            $guard = auth('api');
-            $user = $guard->user();
-
-            if (! $user) {
-                return $this->unauthorized('User not authenticated');
-            }
+            $user = $request->user();
 
             $resource = new UserResource($user);
 

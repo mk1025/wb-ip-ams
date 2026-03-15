@@ -65,19 +65,15 @@ class AuthService
 
     }
 
-    public function logoutUser(Request $request): JsonResponse
+    public function logoutUser(User $user, Request $request): JsonResponse
     {
-        /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
-        $guard = auth('api');
-        $user = $guard->user();
-
         $sessionId = $this->tokenService->getJWTSessionId();
 
         RefreshToken::where('user_id', $user->id)->delete();
 
         $this->logService->logAuthEvent($user, AuthAuditLog::ACTION_LOGOUT, $request, $sessionId);
 
-        $guard->logout();
+        $this->tokenService->invalidateToken();
 
         return $this->success(null, 'Successfully logged out');
 
