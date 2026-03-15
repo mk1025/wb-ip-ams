@@ -16,6 +16,7 @@ import {
   IP_ADDRESS_MUTATION_KEYS,
   IP_ADDRESS_QUERY_KEYS,
 } from "../keys/ip-address";
+import { AUDIT_LOG_QUERY_KEYS } from "../keys/audit-log";
 
 export function useCreateIpAddressMutation(): UseMutationResult<
   IpAddressResource,
@@ -50,6 +51,9 @@ export function useCreateIpAddressMutation(): UseMutationResult<
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [...IP_ADDRESS_QUERY_KEYS.ALL],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [...AUDIT_LOG_QUERY_KEYS.IP_LIST],
       });
       toast.success("IP address created!", {
         id: toastId,
@@ -101,6 +105,9 @@ export function useUpdateIpAddressMutation(
       queryClient.invalidateQueries({
         queryKey: [...IP_ADDRESS_QUERY_KEYS.ALL],
       });
+      queryClient.invalidateQueries({
+        queryKey: [...AUDIT_LOG_QUERY_KEYS.IP_LIST],
+      });
       toast.success("IP address updated!", {
         id: toastId,
         description: undefined,
@@ -145,6 +152,9 @@ export function useDeleteIpAddressMutation(): UseMutationResult<
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [...IP_ADDRESS_QUERY_KEYS.ALL],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [...AUDIT_LOG_QUERY_KEYS.IP_LIST],
       });
       toast.success("IP address deleted!", {
         id: toastId,
