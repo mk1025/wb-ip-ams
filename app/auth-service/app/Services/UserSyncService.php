@@ -17,7 +17,7 @@ class UserSyncService
 
             $secret = config('app.internal_secret');
 
-            $postUrl = "{$url}/api/internal/sync-user";
+            $postUrl = "{$url}/api/internal/users/sync";
 
             Http::timeout(5)->withHeaders(
                 ['X-Internal-Secret' => $secret]
