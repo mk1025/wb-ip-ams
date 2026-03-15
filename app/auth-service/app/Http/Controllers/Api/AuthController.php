@@ -43,11 +43,7 @@ class AuthController extends Controller
         try {
             $user = User::where('email', $request->email)->first();
 
-            if (! $user) {
-                return $this->notFound('User not found');
-            }
-
-            if (! Hash::check((string) $request->password, $user->password)) {
+            if (! $user || ! Hash::check((string) $request->password, $user->password)) {
                 return $this->unauthorized('Invalid credentials');
             }
 
