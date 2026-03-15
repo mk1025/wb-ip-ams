@@ -8,187 +8,114 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RefreshTokenRequest;
 use App\Http\Requests\RegisterRequest;
-use App\Http\Resources\AuthResource;
-use App\Http\Resources\TokenResource;
 use App\Http\Resources\UserResource;
-use App\Models\AuthAuditLog;
 use App\Models\RefreshToken;
 use App\Models\User;
+use App\Services\AuthService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
-use PHPOpenSourceSaver\JWTAuth\JWTAuth;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
     use ApiResponseTrait;
 
-    // Register new user
-    public function register(RegisterRequest $request): JsonResponse
+    public function __construct(private AuthService $authService) {}
+
+    public function store(RegisterRequest $request): JsonResponse
     {
-        $user = User::create([
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'user', // Default role
-        ]);
+        try {
+            $validated = $request->validated();
 
-        // Sync user to IP service
-        $this->syncUserToIpService($user);
+            return $this->authService->registerUser($validated);
+        } catch (\Throwable $th) {
+            Log::error('Error registering user: '.$th->getMessage());
 
-        $sessionId = (string) Str::uuid();
-        /** @var JWTAuth $jwt */
-        $jwt = app(JWTAuth::class);
-        $accessToken = $jwt->claims(['session_id' => $sessionId])->fromUser($user);
-        $refreshToken = $this->createRefreshToken($user);
+            return $this->error('Error registering user', 500);
+        }
 
-        $this->logAuthEvent($user, 'register', $request, $sessionId);
-
-        $resource = new AuthResource($user, $accessToken, $refreshToken->token);
-
-        return $this->created($resource);
     }
 
     // Login user
     public function login(LoginRequest $request): JsonResponse
     {
-        $user = User::where('email', $request->email)->first();
+        try {
+            $user = User::where('email', $request->email)->first();
 
-        if (! $user || ! Hash::check((string) $request->password, $user->password)) {
-            return $this->unauthorized('Invalid credentials');
+            if (! $user) {
+                return $this->notFound('User not found');
+            }
+
+            if (! Hash::check((string) $request->password, $user->password)) {
+                return $this->unauthorized('Invalid credentials');
+            }
+
+            return $this->authService->loginUser($user);
+        } catch (\Throwable $th) {
+            Log::error('Error logging in user: '.$th->getMessage());
+
+            return $this->error('Error logging in user', 500);
         }
-
-        // Sync user to IP service on login
-        $this->syncUserToIpService($user);
-
-        $sessionId = (string) Str::uuid();
-        /** @var JWTAuth $jwt */
-        $jwt = app(JWTAuth::class);
-        $token = $jwt->claims(['session_id' => $sessionId])->fromUser($user);
-        $refreshToken = $this->createRefreshToken($user);
-
-        // Log the login
-        $this->logAuthEvent($user, 'login', $request, $sessionId);
-
-        $resource = new AuthResource($user, $token, $refreshToken->token);
-
-        return $this->success($resource);
     }
 
     // Logout user
-    public function logout(Request $request): JsonResponse
+    public function logout(): JsonResponse
     {
-        /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
-        $guard = auth('api');
-        $user = $guard->user();
-
-        $sessionId = null;
         try {
-            /** @var JWTAuth $jwt */
-            $jwt = app(JWTAuth::class);
-            $raw = $jwt->parseToken()->getPayload()->get('session_id');
-            $sessionId = is_string($raw) ? $raw : null;
-        } catch (\Throwable) {
-            // session_id is best-effort; no token in context during testing
+            return $this->authService->logoutUser();
+        } catch (\Throwable $th) {
+            Log::error('Error during logout: '.$th->getMessage());
+
+            return $this->error('Error during logout', 500);
         }
-
-        RefreshToken::where('user_id', $user->id)->delete();
-
-        $this->logAuthEvent($user, 'logout', $request, $sessionId);
-
-        $guard->logout();
-
-        return $this->success(null, 'Successfully logged out');
     }
 
     // Get authenticated user
     public function me(): JsonResponse
     {
-        /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
-        $guard = auth('api');
+        try {
+            /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
+            $guard = auth('api');
+            $user = $guard->user();
 
-        return $this->success(new UserResource($guard->user()));
+            if (! $user) {
+                return $this->unauthorized('User not authenticated');
+            }
+
+            $resource = new UserResource($user);
+
+            return $this->success($resource);
+        } catch (\Throwable $th) {
+            Log::error('Error fetching authenticated user: '.$th->getMessage());
+
+            return $this->error('Error fetching authenticated user', 500);
+        }
+
     }
 
     // Refresh access token using refresh token
     public function refresh(RefreshTokenRequest $request): JsonResponse
     {
-        $refreshToken = RefreshToken::where('token', $request->refresh_token)->first();
-
-        if (! $refreshToken || $refreshToken->isExpired()) {
-            return $this->unauthorized('Invalid or expired refresh token');
-        }
-
-        $user = $refreshToken->user;
-
-        if (! $user) {
-            return $this->unauthorized('User not found');
-        }
-
-        $sessionId = (string) Str::uuid();
-        /** @var JWTAuth $jwt */
-        $jwt = app(JWTAuth::class);
-        $newAccessToken = $jwt->claims(['session_id' => $sessionId])->fromUser($user);
-
-        $this->logAuthEvent($user, 'token_refresh', $request, $sessionId);
-
-        $resource = new TokenResource($newAccessToken);
-
-        return $this->success($resource);
-    }
-
-    // PRIVATES
-
-    // Create new refresh token for user and delete old ones
-    private function createRefreshToken(User $user): RefreshToken
-    {
-        return DB::transaction(function () use ($user) {
-            RefreshToken::where('user_id', $user->id)->delete();
-
-            return RefreshToken::create([
-                'user_id' => $user->id,
-                'token' => Str::random(64),
-                'expires_at' => now()->addDays(30),
-            ]);
-        });
-    }
-
-    // Log authentication events for auditing
-    private function logAuthEvent(User $user, string $action, Request $request, ?string $sessionId = null): void
-    {
-        AuthAuditLog::create([
-            'user_id' => $user->id,
-            'action' => $action,
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'session_id' => $sessionId,
-            'created_at' => now(),
-        ]);
-
-        Cache::forget('auth_audit_user_options');
-        Cache::forget('auth_audit_action_options');
-    }
-
-    private function syncUserToIpService(User $user): void
-    {
         try {
-            $url = config('services.ip.url', default: 'http://localhost:8001');
-            $secret = config('app.internal_secret');
+            $refreshToken = RefreshToken::where('token', $request->refresh_token)->first();
 
-            Http::timeout(5)
-                ->withHeaders(['X-Internal-Secret' => $secret])
-                ->post("{$url}/api/internal/users/sync", [
-                    'id' => $user->id,
-                    'email' => $user->email,
-                    'role' => $user->role,
-                ]);
-        } catch (\Exception $e) {
+            if (! $refreshToken || $refreshToken->isExpired()) {
+                return $this->unauthorized('Invalid or expired refresh token');
+            }
 
-            \Log::warning('Failed to sync user to IP service: '.$e->getMessage());
+            $user = $refreshToken->user;
+
+            if (! $user) {
+                return $this->notFound('User not found');
+            }
+
+            return $this->authService->refreshToken($user);
+        } catch (\Throwable $th) {
+            Log::error('Error refreshing token: '.$th->getMessage());
+
+            return $this->error('Error refreshing token', 500);
         }
+
     }
 }
