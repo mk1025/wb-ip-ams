@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class IpAddress extends Model
 {
-    //
     protected $fillable = [
         'ip_address',
         'label',

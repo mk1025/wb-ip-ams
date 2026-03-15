@@ -9,7 +9,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class IpAuditLog extends Model
 {
-    //
+    public const ACTION_CREATE = 'create';
+
+    public const ACTION_UPDATE = 'update';
+
+    public const ACTION_DELETE = 'delete';
+
     public $timestamps = false;
 
     protected $fillable = [
