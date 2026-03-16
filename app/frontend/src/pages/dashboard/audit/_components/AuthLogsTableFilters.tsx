@@ -50,6 +50,27 @@ export default function AuthLogsTableFilters({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
+      <InputGroup className="max-w-xs">
+        <InputGroupInput
+          placeholder="Search IP address..."
+          type="search"
+          className="font-mono text-xs"
+          data-slot="input-group-control"
+          value={filter.ip_address ?? ""}
+          onChange={(e) =>
+            onFilterChange?.({
+              ip_address: e.target.value || undefined,
+              page: 1,
+            })
+          }
+        />
+        <InputGroupAddon>
+          <SearchIcon />
+        </InputGroupAddon>
+        <InputGroupAddon align="inline-end">
+          {total} result{total === 1 ? "" : "s"}
+        </InputGroupAddon>
+      </InputGroup>
       <Select
         value={filter.user_id ?? "all"}
         onValueChange={(val) =>
@@ -113,24 +134,6 @@ export default function AuthLogsTableFilters({
           ))}
         </SelectContent>
       </Select>
-      <InputGroup className="max-w-52">
-        <InputGroupAddon>
-          <SearchIcon />
-        </InputGroupAddon>
-        <InputGroupInput
-          placeholder="Search IP address..."
-          type="search"
-          className="font-mono text-xs"
-          data-slot="input-group-control"
-          value={filter.ip_address ?? ""}
-          onChange={(e) =>
-            onFilterChange?.({
-              ip_address: e.target.value || undefined,
-              page: 1,
-            })
-          }
-        />
-      </InputGroup>
       <InputGroup className="max-w-52">
         <InputGroupAddon>
           <SearchIcon />
@@ -215,9 +218,6 @@ export default function AuthLogsTableFilters({
           Clear
         </Button>
       )}
-      <span className="text-muted-foreground ml-auto text-sm tabular-nums">
-        {total} result{total === 1 ? "" : "s"}
-      </span>
     </div>
   );
 }
