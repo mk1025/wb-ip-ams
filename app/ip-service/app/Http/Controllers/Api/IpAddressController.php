@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\IpAddressFilterRequest;
 use App\Http\Requests\StoreIpAddressRequest;
 use App\Http\Requests\UpdateIpAddressRequest;
 use App\Http\Resources\IpAddressResource;
@@ -21,7 +22,7 @@ class IpAddressController extends Controller
 
     public function __construct(private IpAddressService $ipAddressService) {}
 
-    public function index(Request $request): JsonResponse
+    public function index(IpAddressFilterRequest $request): JsonResponse
     {
         try {
             $user = $request->user();

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\IpAuditLogFilterRequest;
 use App\Models\IpAuditLog;
 use App\Services\IpAddressAuditLogService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class IpAuditLogController extends Controller
@@ -18,7 +18,7 @@ class IpAuditLogController extends Controller
 
     public function __construct(private IpAddressAuditLogService $logService) {}
 
-    public function index(Request $request): JsonResponse
+    public function index(IpAuditLogFilterRequest $request): JsonResponse
     {
         try {
             $user = $request->user();

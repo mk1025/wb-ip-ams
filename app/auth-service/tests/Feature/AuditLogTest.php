@@ -148,19 +148,13 @@ class AuditLogTest extends AuthFeatureTestCase
         $this->assertEquals([AuthAuditLog::ACTION_LOGIN, AuthAuditLog::ACTION_LOGOUT], $actions);
     }
 
-    public function test_audit_logs_falls_back_to_default_sort_for_non_allowlisted_column(): void
+    public function test_audit_logs_returns_422_for_invalid_sort_by(): void
     {
         $admin = User::factory()->create(['role' => User::ROLE_SUPER_ADMIN]);
-        $user = User::factory()->create();
-        $log1 = AuthAuditLog::create(['user_id' => $user->id, 'action' => AuthAuditLog::ACTION_LOGIN, 'created_at' => now()->subHour()]);
-        $log2 = AuthAuditLog::create(['user_id' => $user->id, 'action' => AuthAuditLog::ACTION_LOGOUT, 'created_at' => now()]);
 
-        $response = $this->actingAs($admin, 'api')
-            ->getJson(self::AUDIT_LOGS_URL."?sort_by=invalid_column__injection&user_id={$user->id}");
-
-        $response->assertStatus(200);
-        $ids = collect($response->json('data.logs.data'))->pluck('id')->all();
-        $this->assertEquals([$log2->id, $log1->id], $ids);
+        $this->actingAs($admin, 'api')
+            ->getJson(self::AUDIT_LOGS_URL.'?sort_by=invalid_column__injection')
+            ->assertStatus(422);
     }
 
     public function test_audit_logs_returns_422_for_invalid_date_from(): void

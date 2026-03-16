@@ -63,16 +63,10 @@ class AuthAuditLogService
         }
 
         if ($request->filled('date_from')) {
-            if (! strtotime($request->input('date_from')) || ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $request->input('date_from'))) {
-                return $this->error('Invalid date_from format. Use Y-m-d.', 422);
-            }
             $query->whereDate('created_at', '>=', $request->input('date_from'));
         }
 
         if ($request->filled('date_to')) {
-            if (! strtotime($request->input('date_to')) || ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $request->input('date_to'))) {
-                return $this->error('Invalid date_to format. Use Y-m-d.', 422);
-            }
             $query->whereDate('created_at', '<=', $request->input('date_to'));
         }
 
