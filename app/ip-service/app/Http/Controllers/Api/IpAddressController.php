@@ -9,7 +9,6 @@ use App\Http\Requests\StoreIpAddressRequest;
 use App\Http\Requests\UpdateIpAddressRequest;
 use App\Http\Resources\IpAddressResource;
 use App\Models\IpAddress;
-use App\Models\User;
 use App\Services\IpAddressService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
@@ -89,7 +88,7 @@ class IpAddressController extends Controller
                 return $this->notFound('IP address not found');
             }
 
-            if ($user->role !== User::ROLE_SUPER_ADMIN && $ipAddress->owner_id !== $user->id) {
+            if ($user->cannot('update', $ipAddress)) {
                 return $this->forbidden('You do not have permission to update this IP address');
             }
 
@@ -116,7 +115,7 @@ class IpAddressController extends Controller
                 return $this->notFound('IP address not found');
             }
 
-            if ($user->role !== User::ROLE_SUPER_ADMIN) {
+            if ($user->cannot('delete', $ipAddress)) {
                 return $this->forbidden('Only super-admins can delete IP addresses');
             }
 
