@@ -3,6 +3,18 @@ import { useAuthStore } from "@/stores/auth-store";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+function handleAuthError() {
+  localStorage.removeItem("refresh_token");
+
+  useAuthStore.getState().clearAuth();
+
+  const currentPath = globalThis.location.pathname;
+
+  if (currentPath !== "/login" && currentPath !== "/register") {
+    globalThis.location.href = "/login";
+  }
+}
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -41,14 +53,7 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem("refresh_token");
         if (!refreshToken) {
-          localStorage.removeItem("refresh_token");
-          useAuthStore.getState().clearAuth();
-
-          const currentPath = globalThis.location.pathname;
-          if (currentPath !== "/login" && currentPath !== "/register") {
-            globalThis.location.href = "/login";
-          }
-
+          handleAuthError();
           throw error;
         }
 
@@ -65,14 +70,7 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${data.data.access_token}`;
         return api(originalRequest);
       } catch (refreshError) {
-        localStorage.removeItem("refresh_token");
-        useAuthStore.getState().clearAuth();
-
-        const currentPath = globalThis.location.pathname;
-        if (currentPath !== "/login" && currentPath !== "/register") {
-          globalThis.location.href = "/login";
-        }
-
+        handleAuthError();
         throw refreshError;
       }
     }
