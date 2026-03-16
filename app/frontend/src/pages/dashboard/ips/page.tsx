@@ -8,10 +8,10 @@ import { Spinner } from "@/components/ui/spinner";
 import { Link } from "react-router-dom";
 import { IpListColumns } from "./_components/columns";
 import { IpListDataTable } from "./_components/data-table";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useQueryToast } from "@/hooks/use-query-toast";
 import { PlusIcon } from "lucide-react";
-import { toast } from "sonner";
 
 export default function IpListPage() {
   const [filter, setFilter] = useState<GetIpAddressesParams>({
@@ -40,26 +40,14 @@ export default function IpListPage() {
     [user?.id, isAdmin],
   );
 
-  useEffect(() => {
-    if (isError) {
-      toast.error("Failed to load IP addresses. Please try again.", {
-        id: toastId,
-        description: error instanceof Error ? error.message : undefined,
-      });
-    } else if (isLoading) {
-      toast.loading("Loading IP addresses...", {
-        id: toastId,
-        description: undefined,
-      });
-    } else if (isFetching) {
-      toast.loading("Updating results...", {
-        id: toastId,
-        description: undefined,
-      });
-    } else {
-      toast.dismiss(toastId);
-    }
-  }, [toastId, isLoading, isFetching, isError, error, isSuccess]);
+  useQueryToast(
+    { isLoading, isFetching, isError, error, isSuccess },
+    {
+      id: toastId,
+      loadingMessage: "Loading IP addresses...",
+      errorMessage: "Failed to load IP addresses. Please try again.",
+    },
+  );
 
   if (isLoading) {
     return (
