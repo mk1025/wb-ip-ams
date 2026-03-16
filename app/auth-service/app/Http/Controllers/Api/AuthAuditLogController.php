@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\AuthAuditLog;
 use App\Services\AuthAuditLogService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
@@ -23,7 +23,7 @@ class AuthAuditLogController extends Controller
         try {
             $user = $request->user();
 
-            if ($user->role !== User::ROLE_SUPER_ADMIN) {
+            if ($user->cannot('viewAny', AuthAuditLog::class)) {
                 return $this->forbidden('Only super-admins can view audit logs');
             }
 
