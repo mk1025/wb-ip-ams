@@ -27,7 +27,7 @@ describe("useAuthStore", () => {
   });
 
   it("setAuth populates user, token and marks isAuthenticated true", () => {
-    useAuthStore.getState().setAuth(mockUser, "token-abc");
+    useAuthStore.getState().setAuth(mockUser, "token-abc", "refresh-token-123");
 
     const state = useAuthStore.getState();
     expect(state.user).toEqual(mockUser);
@@ -36,7 +36,7 @@ describe("useAuthStore", () => {
   });
 
   it("clearAuth resets all fields to defaults", () => {
-    useAuthStore.getState().setAuth(mockUser, "token-abc");
+    useAuthStore.getState().setAuth(mockUser, "token-abc", "refresh-token-123");
     useAuthStore.getState().clearAuth();
 
     const state = useAuthStore.getState();
@@ -46,7 +46,7 @@ describe("useAuthStore", () => {
   });
 
   it("updateToken only updates accessToken, leaving user and isAuthenticated intact", () => {
-    useAuthStore.getState().setAuth(mockUser, "old-token");
+    useAuthStore.getState().setAuth(mockUser, "old-token", "refresh-token-123");
     useAuthStore.getState().updateToken("new-token");
 
     const state = useAuthStore.getState();
