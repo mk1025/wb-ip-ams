@@ -101,7 +101,7 @@ class AuthAuditLogService
     private function getUserFilterOptions(): array
     {
         try {
-            return Cache::remember('auth_audit_user_options', 60, function (): array {
+            return Cache::remember(self::CACHE_KEY_USER_OPTIONS, 60, function (): array {
                 return User::withCount('authAuditLogs')
                     ->whereHas('authAuditLogs')
                     ->orderByDesc('auth_audit_logs_count')
