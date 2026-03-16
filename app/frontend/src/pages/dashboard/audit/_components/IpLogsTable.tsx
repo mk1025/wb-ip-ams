@@ -18,8 +18,7 @@ import type { IpAuditLogsResponse } from "@wb-ip-ams/shared-types";
 import CustomTablePagination from "../../../../components/common/CustomTablePagination";
 import IpLogsTableFilters from "./IpLogsTableFilters";
 import { getIpActionColor } from "../util";
-import { Button } from "@/components/ui/button";
-import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon } from "lucide-react";
+import SortableColumnHeader from "@/components/common/SortableColumnHeader";
 
 export default function IpLogsTable({
   response,
@@ -48,30 +47,22 @@ export default function IpLogsTable({
     col: NonNullable<IpAuditLogParams["sort_by"]>,
     label: string,
   ) {
-    const isActive = filter.sort_by === col;
     return (
-      <Button
-        variant="ghost"
+      <SortableColumnHeader
+        label={label}
+        isActive={filter.sort_by === col}
+        sortDir={filter.sort_dir}
         onClick={() =>
           onFilterChange?.({
             sort_by: col,
-            sort_dir: isActive && filter.sort_dir === "asc" ? "desc" : "asc",
+            sort_dir:
+              filter.sort_by === col && filter.sort_dir === "asc"
+                ? "desc"
+                : "asc",
             page: 1,
           })
         }
-        className="px-0!"
-      >
-        {label}
-        {isActive ? (
-          filter.sort_dir === "asc" ? (
-            <ArrowUpIcon className="size-3.5" />
-          ) : (
-            <ArrowDownIcon className="size-3.5" />
-          )
-        ) : (
-          <ArrowUpDownIcon className="text-muted-foreground size-3.5" />
-        )}
-      </Button>
+      />
     );
   }
 

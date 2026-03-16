@@ -12,9 +12,8 @@ import CustomTablePagination from "../../../../components/common/CustomTablePagi
 import type { AuthAuditLogParams } from "@/hooks/queries/audit-log";
 import AuthLogsTableFilters from "./AuthLogsTableFilters";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { getAuthActionColor } from "../util";
-import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon } from "lucide-react";
+import SortableColumnHeader from "@/components/common/SortableColumnHeader";
 
 export default function AuthLogsTable({
   response,
@@ -43,30 +42,22 @@ export default function AuthLogsTable({
     col: NonNullable<AuthAuditLogParams["sort_by"]>,
     label: string,
   ) {
-    const isActive = filter.sort_by === col;
     return (
-      <Button
-        variant="ghost"
+      <SortableColumnHeader
+        label={label}
+        isActive={filter.sort_by === col}
+        sortDir={filter.sort_dir}
         onClick={() =>
           onFilterChange?.({
             sort_by: col,
-            sort_dir: isActive && filter.sort_dir === "asc" ? "desc" : "asc",
+            sort_dir:
+              filter.sort_by === col && filter.sort_dir === "asc"
+                ? "desc"
+                : "asc",
             page: 1,
           })
         }
-        className="px-0!"
-      >
-        {label}
-        {isActive ? (
-          filter.sort_dir === "asc" ? (
-            <ArrowUpIcon className="size-3.5" />
-          ) : (
-            <ArrowDownIcon className="size-3.5" />
-          )
-        ) : (
-          <ArrowUpDownIcon className="text-muted-foreground size-3.5" />
-        )}
-      </Button>
+      />
     );
   }
 
