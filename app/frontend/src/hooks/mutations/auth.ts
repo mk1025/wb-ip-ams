@@ -39,9 +39,7 @@ export function useRegisterMutation(): UseMutationResult<
       });
     },
     onSuccess: (data) => {
-      localStorage.setItem("refresh_token", data.tokens.refresh_token);
-
-      setAuth(data.user, data.tokens.access_token);
+      setAuth(data.user, data.tokens.access_token, data.tokens.refresh_token);
 
       toast.success("Registration successful!", {
         id: toastId,
@@ -88,9 +86,7 @@ export function useLoginMutation(): UseMutationResult<
       });
     },
     onSuccess: (data) => {
-      localStorage.setItem("refresh_token", data.tokens.refresh_token);
-
-      setAuth(data.user, data.tokens.access_token);
+      setAuth(data.user, data.tokens.access_token, data.tokens.refresh_token);
 
       toast.success("Login successful!", {
         id: toastId,
