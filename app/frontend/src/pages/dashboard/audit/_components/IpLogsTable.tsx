@@ -14,7 +14,10 @@ import {
 } from "@/components/ui/tooltip";
 import type { IpAuditLogParams } from "@/hooks/queries/audit-log";
 import { cn } from "@/lib/utils";
-import type { IpAuditLogsResponse } from "@wb-ip-ams/shared-types";
+import type {
+  IpAuditLogsResponse,
+  IpAddressSnapshot,
+} from "@wb-ip-ams/shared-types";
 import CustomTablePagination from "../../../../components/common/CustomTablePagination";
 import IpLogsTableFilters from "./IpLogsTableFilters";
 import { getIpActionColor } from "../util";
@@ -161,16 +164,9 @@ export default function IpLogsTable({
   );
 }
 
-interface IpValueRecord {
-  ip_address?: string;
-  label?: string;
-  comment?: string;
-  [key: string]: unknown;
-}
-
 function IpValueCell({
   value,
-}: Readonly<{ value: IpValueRecord | null | undefined }>) {
+}: Readonly<{ value: IpAddressSnapshot | null | undefined }>) {
   if (!value) return <span>—</span>;
 
   return (

@@ -1,12 +1,20 @@
 import type { PaginatedResponse } from "../common.types";
 
+// ROLE
+
+export const Role = {
+  User: "user",
+  SuperAdmin: "super-admin",
+} as const;
+
+export type Role = (typeof Role)[keyof typeof Role];
+
 // USER
 
 export interface TableUser {
   id: number;
   email: string;
-  password: string;
-  role: "user" | "super-admin";
+  role: Role;
   created_at: string;
   updated_at: string;
 }

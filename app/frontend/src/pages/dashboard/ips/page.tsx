@@ -12,6 +12,7 @@ import { useId, useMemo, useState } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useQueryToast } from "@/hooks/use-query-toast";
 import { PlusIcon } from "lucide-react";
+import { Role } from "@wb-ip-ams/shared-types";
 
 export default function IpListPage() {
   const [filter, setFilter] = useState<GetIpAddressesParams>({
@@ -33,7 +34,7 @@ export default function IpListPage() {
     });
   const user = useAuthStore((state) => state.user);
 
-  const isAdmin = user?.role === "super-admin";
+  const isAdmin = user?.role === Role.SuperAdmin;
 
   const columns = useMemo(
     () => IpListColumns({ currentUserId: user?.id, isAdmin }),

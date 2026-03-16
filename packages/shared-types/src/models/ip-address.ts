@@ -2,6 +2,13 @@ import type { PaginatedResponse } from "../common.types";
 
 // IP-ADDRESS
 
+export interface IpAddressSnapshot {
+  ip_address: string;
+  label: string;
+  comment: string | null;
+  owner_id: number;
+}
+
 export interface TableIpAddress {
   id: number;
   ip_address: string;
@@ -19,8 +26,8 @@ export interface TableIpAuditLog {
   user_email: string | null;
   action: "create" | "update" | "delete";
   entity_id: number;
-  old_value: Record<string, unknown>; // json
-  new_value: Record<string, unknown>; // json
+  old_value: IpAddressSnapshot | null;
+  new_value: IpAddressSnapshot | null;
   ip_address: string | null;
   user_agent: string | null;
   session_id: string | null;

@@ -14,6 +14,7 @@ import { useMemo, useState } from "react";
 import { Spinner } from "../ui/spinner";
 import { cn } from "@/lib/utils";
 import { getNavItems } from "@/lib/nav-items";
+import { Role } from "@wb-ip-ams/shared-types";
 
 export default function HeaderMobileMenu() {
   const { user } = useAuthStore();
@@ -22,7 +23,7 @@ export default function HeaderMobileMenu() {
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const isAdmin = user?.role === "super-admin";
+  const isAdmin = user?.role === Role.SuperAdmin;
 
   const { mutateAsync: logout, isPending } = useLogoutMutation();
 

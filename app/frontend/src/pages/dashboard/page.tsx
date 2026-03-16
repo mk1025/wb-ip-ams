@@ -13,11 +13,13 @@ import { useGetIpStats } from "@/hooks/queries/ip-address";
 import { useAuthStore } from "@/stores/auth-store";
 import { LogsIcon, NetworkIcon, UserIcon, UserStarIcon } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Role } from "@wb-ip-ams/shared-types";
 
 export default function DashboardPage() {
   const user = useAuthStore((state) => state.user);
 
-  const isAdmin = user?.role === "super-admin";
+  const isAdmin = user?.role === Role.SuperAdmin;
+
   const { data: stats, isLoading: statsLoading } = useGetIpStats();
 
   return (
@@ -40,7 +42,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <p className="inline-flex items-center gap-2.5 text-2xl font-bold text-purple-400 capitalize">
-                {user?.role === "super-admin" && <UserStarIcon />}
+                {user?.role === Role.SuperAdmin && <UserStarIcon />}
                 {user?.role?.replace("-", " ")}
               </p>
             </CardContent>

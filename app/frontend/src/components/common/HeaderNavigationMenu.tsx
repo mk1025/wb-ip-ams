@@ -9,11 +9,12 @@ import {
 import { useAuthStore } from "@/stores/auth-store";
 import { getNavItems } from "@/lib/nav-items";
 import { useMemo } from "react";
+import { Role } from "@wb-ip-ams/shared-types";
 
 export default function HeaderNavigationMenu() {
   const { user } = useAuthStore();
 
-  const isAdmin = user?.role === "super-admin";
+  const isAdmin = user?.role === Role.SuperAdmin;
 
   const navItems = useMemo(() => getNavItems(isAdmin), [isAdmin]);
 

@@ -6,6 +6,7 @@ import { Spinner } from "../ui/spinner";
 import HeaderMobileMenu from "../common/HeaderMobileMenu";
 import HeaderNavigationMenu from "../common/HeaderNavigationMenu";
 import { LogOutIcon } from "lucide-react";
+import { Role } from "@wb-ip-ams/shared-types";
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ export default function DashboardLayout() {
     await logout().finally(() => navigate("/login"));
   }
 
-  const isAdmin = user?.role === "super-admin";
+  const isAdmin = user?.role === Role.SuperAdmin;
 
   return (
     <div className="min-h-screen bg-gray-50">
