@@ -8,15 +8,11 @@ import {
 } from "@/hooks/queries/audit-log";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useQueryToast } from "@/hooks/use-query-toast";
-import { useAuthStore } from "@/stores/auth-store";
-import { Navigate } from "react-router-dom";
 import AuthLogsTable from "./_components/AuthLogsTable";
 import IpLogsTable from "./_components/IpLogsTable";
 import { useId, useState } from "react";
 
 export default function AuditLogPage() {
-  const user = useAuthStore((state) => state.user);
-
   const authToastId = useId();
   const ipToastId = useId();
 
@@ -92,10 +88,6 @@ export default function AuditLogPage() {
       errorMessage: "Failed to load IP logs. Please try again.",
     },
   );
-
-  if (user?.role !== "super-admin") {
-    return <Navigate to="/dashboard" replace />;
-  }
 
   return (
     <>
