@@ -3,17 +3,16 @@ networks:
     driver: bridge
 
 services:
-  # Databases
   mysql-auth:
     image: mysql:8.0
     container_name: wb-ip-ams-mysql-auth
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_AUTH_ROOT_PASSWORD:-root}
-      MYSQL_DATABASE: auth_service_db
+      MYSQL_DATABASE: ${AUTH_DB_DATABASE:-auth_service_db}
       MYSQL_USER: ${AUTH_DB_USERNAME:-auth_user}
       MYSQL_PASSWORD: ${AUTH_DB_PASSWORD:-auth_secret}
     ports:
-      - "3307:3306"
+      - "${AUTH_DB_PORT:-3307}:3306"
     volumes:
       - mysql-auth-data:/var/lib/mysql
     networks:
@@ -29,11 +28,11 @@ services:
     container_name: wb-ip-ams-mysql-ip
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_IP_ROOT_PASSWORD:-root}
-      MYSQL_DATABASE: ip_service_db
+      MYSQL_DATABASE: ${IP_DB_DATABASE:-ip_service_db}
       MYSQL_USER: ${IP_DB_USERNAME:-ip_user}
       MYSQL_PASSWORD: ${IP_DB_PASSWORD:-ip_secret}
     ports:
-      - "3308:3306"
+      - "${IP_DB_PORT:-3308}:3306"
     volumes:
       - mysql-ip-data:/var/lib/mysql
     networks:
@@ -44,7 +43,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # Backend Services
   auth-service:
     build:
       context: ./app/auth-service
@@ -56,18 +54,14 @@ services:
       DB_CONNECTION: mysql
       DB_HOST: mysql-auth
       DB_PORT: 3306
-      DB_DATABASE: auth_service_db
+      DB_DATABASE: ${AUTH_DB_DATABASE:-auth_service_db}
       DB_USERNAME: ${AUTH_DB_USERNAME:-auth_user}
       DB_PASSWORD: ${AUTH_DB_PASSWORD:-auth_secret}
-      # RS256 asymmetric JWT — Auth holds private key (signs), IP holds public key only (verifies).
-      # Generate: openssl genrsa -out private.pem 4096 && openssl rsa -in private.pem -pubout -out public.pem
-      # Encode:   JWT_PRIVATE_KEY=$(base64 -w 0 private.pem)  &&  JWT_PUBLIC_KEY=$(base64 -w 0 public.pem)
       JWT_ALGO: RS256
       JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY:?JWT_PRIVATE_KEY is required}
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:?JWT_PUBLIC_KEY is required}
       JWT_TTL: ${JWT_TTL:-1440}
       IP_SERVICE_URL: http://ip-service:8000
-      # Shared secret for internal service-to-service calls
       INTERNAL_SECRET: ${INTERNAL_SECRET:-change-me-internal-secret}
       CACHE_STORE: file
       SESSION_DRIVER: file
@@ -92,14 +86,12 @@ services:
       DB_CONNECTION: mysql
       DB_HOST: mysql-ip
       DB_PORT: 3306
-      DB_DATABASE: ip_service_db
+      DB_DATABASE: ${IP_DB_DATABASE:-ip_service_db}
       DB_USERNAME: ${IP_DB_USERNAME:-ip_user}
       DB_PASSWORD: ${IP_DB_PASSWORD:-ip_secret}
-      # RS256 public key only — IP Service verifies tokens but must never hold the private key.
       JWT_ALGO: RS256
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:?JWT_PUBLIC_KEY is required}
       JWT_TTL: ${JWT_TTL:-1440}
-      # Shared secret for internal service-to-service calls
       INTERNAL_SECRET: ${INTERNAL_SECRET:-change-me-internal-secret}
       CACHE_STORE: file
       SESSION_DRIVER: file
@@ -118,11 +110,11 @@ services:
       context: ./app/gateway
     container_name: wb-ip-ams-gateway
     ports:
-      - "3000:8000"
+      - "${GATEWAY_PORT:-3000}:8000"
     environment:
       APP_ENV: production
       APP_DEBUG: "false"
-      APP_URL: http://localhost:3000
+      APP_URL: ${GATEWAY_APP_URL:-http://localhost:3000}
       DB_CONNECTION: sqlite
       DB_DATABASE: /var/www/database/database.sqlite
       AUTH_SERVICE_URL: http://auth-service:8000
@@ -139,7 +131,6 @@ services:
     networks:
       - app-network
 
-  # Frontend
   frontend:
     build:
       context: .
@@ -148,7 +139,7 @@ services:
         VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:3000/api}
     container_name: wb-ip-ams-frontend
     ports:
-      - "80:80"
+      - "${FRONTEND_PORT:-80}:80"
     depends_on:
       - gateway
     networks:
