@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\GatewayController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('throttle:api')->group(function () {
@@ -15,6 +14,6 @@ Route::middleware('throttle:api')->group(function () {
     Route::any('/ip-addresses/{path?}', [GatewayController::class, 'forwardToIp'])
         ->where('path', '[a-zA-Z0-9\-_\/]*');
 
-    Route::any('/audit/auth', fn (Request $r) => app(GatewayController::class)->forwardToAuth($r, 'audit-logs'));
-    Route::any('/audit/ip', fn (Request $r) => app(GatewayController::class)->forwardToIp($r, 'audit-logs'));
+    Route::any('/audit/auth', [GatewayController::class, 'forwardAuditToAuth']);
+    Route::any('/audit/ip', [GatewayController::class, 'forwardAuditToIp']);
 });

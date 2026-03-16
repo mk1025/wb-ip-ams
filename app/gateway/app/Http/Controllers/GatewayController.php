@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,35 +13,40 @@ use Illuminate\Support\Facades\Http;
 
 class GatewayController extends Controller
 {
+    use ApiResponseTrait;
+
     public function forwardToAuth(Request $request, string $path = ''): Response|JsonResponse
     {
         $url = config('services.auth.url', 'http://localhost:8000').'/api';
-        // Reconstruct the full path with 'auth' prefix
-        $fullPath = 'auth/'.$path;
 
-        return $this->forward($url, $fullPath, $request);
+        return $this->forward($url, 'auth/'.$path, $request);
+    }
+
+    public function forwardAuditToAuth(Request $request): Response|JsonResponse
+    {
+        return $this->forwardToAuth($request, 'audit-logs');
     }
 
     public function forwardToIp(Request $request, string $path = ''): Response|JsonResponse
     {
         $url = config('services.ip.url', 'http://localhost:8001').'/api';
-        // Reconstruct the full path with 'ip-addresses' prefix
-        $fullPath = 'ip-addresses/'.$path;
 
-        return $this->forward($url, $fullPath, $request);
+        return $this->forward($url, 'ip-addresses/'.$path, $request);
+    }
+
+    public function forwardAuditToIp(Request $request): Response|JsonResponse
+    {
+        return $this->forwardToIp($request, 'audit-logs');
     }
 
     private function forward(string $baseUrl, string $path, Request $request): Response|JsonResponse
     {
-        // Remove trailing slash from path if present
-        $path = rtrim($path, '/');
-        $url = $baseUrl.'/'.$path;
+        $url = $baseUrl.'/'.rtrim($path, '/');
         $method = strtolower($request->method());
 
         $httpRequest = Http::withoutRedirecting()
-            ->withHeaders($this->getForwardHeaders($request));
-
-        $httpRequest = $httpRequest->timeout(30);
+            ->withHeaders($this->getForwardHeaders($request))
+            ->timeout(30);
 
         try {
             $response = match ($method) {
@@ -52,10 +58,7 @@ class GatewayController extends Controller
                 default => $httpRequest->get($url),
             };
         } catch (ConnectionException) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Service unavailable. Please try again later.',
-            ], 503);
+            return $this->error('Service unavailable. Please try again later.', 503);
         }
 
         return response($response->body(), $response->status())
