@@ -6,6 +6,7 @@ namespace Tests\Feature;
 
 use App\Models\RefreshToken;
 use App\Models\User;
+use App\Services\TokenService;
 
 class AuthTest extends AuthFeatureTestCase
 {
@@ -22,7 +23,7 @@ class AuthTest extends AuthFeatureTestCase
                 'success',
                 'data' => [
                     'user' => ['id', 'email', 'role'],
-                    'tokens' => ['access_token', 'refresh_token', 'token_type'],
+                    'tokens' => ['access_token', 'token_type'],
                 ],
             ])
             ->assertJsonPath('success', true)
@@ -32,7 +33,7 @@ class AuthTest extends AuthFeatureTestCase
 
         $tokens = $response->json('data.tokens');
         $this->assertNotEmpty($tokens['access_token']);
-        $this->assertNotEmpty($tokens['refresh_token']);
+        $response->assertCookie('refresh_token');
     }
 
     public function test_register_returns_422_for_missing_email(): void
@@ -106,7 +107,7 @@ class AuthTest extends AuthFeatureTestCase
                 'success',
                 'data' => [
                     'user' => ['id', 'email', 'role'],
-                    'tokens' => ['access_token', 'refresh_token', 'token_type'],
+                    'tokens' => ['access_token', 'token_type'],
                 ],
             ])
             ->assertJsonPath('success', true)
@@ -114,7 +115,7 @@ class AuthTest extends AuthFeatureTestCase
 
         $tokens = $response->json('data.tokens');
         $this->assertNotEmpty($tokens['access_token']);
-        $this->assertNotEmpty($tokens['refresh_token']);
+        $response->assertCookie('refresh_token');
     }
 
     public function test_login_returns_401_for_wrong_password(): void
@@ -198,15 +199,12 @@ class AuthTest extends AuthFeatureTestCase
     public function test_refresh_returns_new_access_token_for_valid_refresh_token(): void
     {
         $user = User::factory()->create();
-        $refreshToken = RefreshToken::create([
-            'user_id' => $user->id,
-            'token' => str_repeat('v', 64),
-            'expires_at' => now()->addDays(30),
-        ]);
 
-        $response = $this->postJson(self::REFRESH_URL, [
-            'refresh_token' => $refreshToken->token,
-        ]);
+        $refreshToken = app(TokenService::class)->createRefreshToken($user);
+
+        $response = $this->withCredentials()
+            ->withUnencryptedCookie('refresh_token', $refreshToken->token)
+            ->postJson(self::REFRESH_URL);
 
         $response->assertStatus(200)
             ->assertJsonStructure(['success', 'data' => ['access_token', 'token_type']])
@@ -216,24 +214,20 @@ class AuthTest extends AuthFeatureTestCase
     public function test_refresh_does_not_delete_the_refresh_token(): void
     {
         $user = User::factory()->create();
-        $refreshToken = RefreshToken::create([
-            'user_id' => $user->id,
-            'token' => str_repeat('v', 64),
-            'expires_at' => now()->addDays(30),
-        ]);
 
-        $this->postJson(self::REFRESH_URL, [
-            'refresh_token' => $refreshToken->token,
-        ]);
+        $refreshToken = app(TokenService::class)->createRefreshToken($user);
+
+        $this->withCredentials()->withUnencryptedCookie('refresh_token', $refreshToken->token)
+            ->postJson(self::REFRESH_URL);
 
         $this->assertDatabaseHas('refresh_tokens', ['id' => $refreshToken->id]);
     }
 
     public function test_refresh_returns_401_for_invalid_token(): void
     {
-        $response = $this->postJson(self::REFRESH_URL, [
-            'refresh_token' => 'completely-bogus-token-that-does-not-exist',
-        ]);
+        $response = $this->withCredentials()
+            ->withUnencryptedCookie('refresh_token', 'completely-bogus-token-that-does-not-exist')
+            ->postJson(self::REFRESH_URL);
 
         $response->assertStatus(401);
     }
@@ -241,23 +235,21 @@ class AuthTest extends AuthFeatureTestCase
     public function test_refresh_returns_401_for_expired_token(): void
     {
         $user = User::factory()->create();
-        $refreshToken = RefreshToken::create([
-            'user_id' => $user->id,
-            'token' => str_repeat('e', 64),
-            'expires_at' => now()->subDay(), // expired yesterday
-        ]);
 
-        $response = $this->postJson(self::REFRESH_URL, [
-            'refresh_token' => $refreshToken->token,
-        ]);
+        $refreshToken = app(TokenService::class)->createRefreshToken($user);
+        $refreshToken->update(['expires_at' => now()->subDay()]);
+
+        $response = $this->withCredentials()
+            ->withUnencryptedCookie('refresh_token', $refreshToken->token)
+            ->postJson(self::REFRESH_URL);
 
         $response->assertStatus(401);
     }
 
-    public function test_refresh_returns_422_for_missing_refresh_token_field(): void
+    public function test_refresh_returns_401_for_missing_refresh_token_cookie(): void
     {
-        $response = $this->postJson(self::REFRESH_URL, []);
+        $response = $this->postJson(self::REFRESH_URL);
 
-        $response->assertStatus(422);
+        $response->assertStatus(401);
     }
 }
