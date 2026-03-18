@@ -12,13 +12,10 @@ class AuthResource extends JsonResource
 {
     private string $accessToken;
 
-    private string $refreshToken;
-
-    public function __construct(User $user, string $accessToken, string $refreshToken)
+    public function __construct(User $user, string $accessToken)
     {
         parent::__construct($user);
         $this->accessToken = $accessToken;
-        $this->refreshToken = $refreshToken;
     }
 
     /**
@@ -32,7 +29,6 @@ class AuthResource extends JsonResource
             'user' => new UserResource($this->resource),
             'tokens' => [
                 'access_token' => $this->accessToken,
-                'refresh_token' => $this->refreshToken,
                 'token_type' => 'bearer',
                 'expires_in' => config('jwt.ttl') * 60,
             ],

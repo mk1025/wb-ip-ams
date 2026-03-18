@@ -61,10 +61,16 @@ class GatewayController extends Controller
             return $this->error('Service unavailable. Please try again later.', 503);
         }
 
+        $headers = [
+            'Content-Type' => $response->header('Content-Type') ?: 'application/json',
+        ];
+
+        if ($response->hasHeader('Set-Cookie')) {
+            $headers['Set-Cookie'] = $response->header('Set-Cookie');
+        }
+
         return response($response->body(), $response->status())
-            ->withHeaders([
-                'Content-Type' => $response->header('Content-Type') ?: 'application/json',
-            ]);
+            ->withHeaders($headers);
     }
 
     /** @return array<string, string> */
@@ -85,6 +91,10 @@ class GatewayController extends Controller
 
         if ($request->hasHeader('X-Requested-With')) {
             $headers['X-Requested-With'] = (string) $request->header('X-Requested-With');
+        }
+
+        if ($request->hasHeader('Cookie')) {
+            $headers['Cookie'] = (string) $request->header('Cookie');
         }
 
         return $headers;

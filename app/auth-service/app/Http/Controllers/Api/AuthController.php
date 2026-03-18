@@ -6,7 +6,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
-use App\Http\Requests\RefreshTokenRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Models\RefreshToken;
@@ -84,10 +83,16 @@ class AuthController extends Controller
 
     }
 
-    public function refresh(RefreshTokenRequest $request): JsonResponse
+    public function refresh(Request $request): JsonResponse
     {
         try {
-            $refreshToken = RefreshToken::where('token', $request->refresh_token)->first();
+            $token = $request->cookie('refresh_token');
+
+            if (! $token) {
+                return $this->unauthorized('Missing refresh token');
+            }
+
+            $refreshToken = RefreshToken::where('token', $token)->first();
 
             if (! $refreshToken || $refreshToken->isExpired()) {
                 return $this->unauthorized('Invalid or expired refresh token');

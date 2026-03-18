@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Cookie;
 
 class AuthService
 {
@@ -42,9 +43,11 @@ class AuthService
 
         $this->logService->logAuthEvent($user, AuthAuditLog::ACTION_REGISTER, $request, $sessionId);
 
-        $resource = new AuthResource($user, $accessToken, $refreshToken->token);
+        $resource = new AuthResource($user, $accessToken);
 
-        return $this->created($resource);
+        $cookie = $this->refreshTokenCookie($refreshToken->token);
+
+        return $this->created($resource)->cookie($cookie);
 
     }
 
@@ -59,9 +62,11 @@ class AuthService
 
         $this->logService->logAuthEvent($user, AuthAuditLog::ACTION_LOGIN, $request, $sessionId);
 
-        $resource = new AuthResource($user, $accessToken, $refreshToken->token);
+        $resource = new AuthResource($user, $accessToken);
 
-        return $this->success($resource);
+        $cookie = $this->refreshTokenCookie($refreshToken->token);
+
+        return $this->success($resource)->cookie($cookie);
 
     }
 
@@ -75,7 +80,9 @@ class AuthService
 
         $this->tokenService->invalidateToken();
 
-        return $this->success(null, 'Successfully logged out');
+        $cookie = $this->refreshTokenCookie('', -1);
+
+        return $this->success(null, 'Successfully logged out')->cookie($cookie);
 
     }
 
@@ -91,5 +98,20 @@ class AuthService
 
         return $this->success($resource);
 
+    }
+
+    private function refreshTokenCookie(string $token, ?int $minutes = null): Cookie
+    {
+        return cookie(
+            'refresh_token',
+            $token,
+            $minutes ?? config('jwt.refresh_ttl'),
+            '/api/auth/refresh',
+            null,
+            app()->environment('production'),
+            true,
+            false,
+            'Lax',
+        );
     }
 }
