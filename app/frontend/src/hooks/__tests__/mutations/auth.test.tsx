@@ -30,7 +30,6 @@ const mockAuthResponse = {
       },
       tokens: {
         access_token: "access-123",
-        refresh_token: "refresh-456",
         token_type: "bearer",
         expires_in: 3600,
       },
@@ -59,7 +58,7 @@ describe("useRegisterMutation", () => {
     mockPost.mockResolvedValue(mockAuthResponse);
   });
 
-  it("on success: stores refresh_token in localStorage and updates auth store", async () => {
+  it("on success: updates auth store with user and access token", async () => {
     const { result } = renderHook(() => useRegisterMutation(), {
       wrapper: makeWrapper(),
     });
@@ -73,7 +72,6 @@ describe("useRegisterMutation", () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(localStorage.getItem("access_token")).toBeNull();
-    expect(localStorage.getItem("refresh_token")).toBe("refresh-456");
     expect(useAuthStore.getState().isAuthenticated).toBe(true);
     expect(useAuthStore.getState().accessToken).toBe("access-123");
   });
@@ -110,7 +108,7 @@ describe("useLoginMutation", () => {
     mockPost.mockResolvedValue(mockAuthResponse);
   });
 
-  it("on success: stores refresh_token in localStorage and marks authenticated", async () => {
+  it("on success: updates auth store with user and access token", async () => {
     const { result } = renderHook(() => useLoginMutation(), {
       wrapper: makeWrapper(),
     });
@@ -123,7 +121,6 @@ describe("useLoginMutation", () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(localStorage.getItem("access_token")).toBeNull();
-    expect(localStorage.getItem("refresh_token")).toBe("refresh-456");
     expect(useAuthStore.getState().isAuthenticated).toBe(true);
     expect(useAuthStore.getState().accessToken).toBe("access-123");
   });
@@ -148,7 +145,6 @@ describe("useLogoutMutation", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.setItem("access_token", "existing-token");
-    localStorage.setItem("refresh_token", "existing-refresh");
     useAuthStore.setState({
       user: {
         id: 1,
@@ -165,7 +161,7 @@ describe("useLogoutMutation", () => {
     });
   });
 
-  it("on success: removes refresh_token from localStorage and clears auth store", async () => {
+  it("on success: clears auth store on logout", async () => {
     const { result } = renderHook(() => useLogoutMutation(), {
       wrapper: makeWrapper(),
     });
@@ -174,14 +170,14 @@ describe("useLogoutMutation", () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(localStorage.getItem("access_token")).toBe("existing-token"); // not managed by mutation; Zustand persist owns access_token
+    expect(localStorage.getItem("access_token")).toBe("existing-token");
     expect(localStorage.getItem("refresh_token")).toBeNull();
     expect(useAuthStore.getState().isAuthenticated).toBe(false);
     expect(useAuthStore.getState().accessToken).toBeNull();
     expect(useAuthStore.getState().user).toBeNull();
   });
 
-  it("on error: still removes refresh_token from localStorage and clears auth store", async () => {
+  it("on error: still clears auth store on logout", async () => {
     mockPost.mockRejectedValue(new Error("Network error"));
 
     const { result } = renderHook(() => useLogoutMutation(), {
