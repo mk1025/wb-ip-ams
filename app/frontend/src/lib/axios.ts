@@ -4,8 +4,6 @@ import { useAuthStore } from "@/stores/auth-store";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function handleAuthError() {
-  localStorage.removeItem("refresh_token");
-
   useAuthStore.getState().clearAuth();
 
   const currentPath = globalThis.location.pathname;
@@ -17,6 +15,7 @@ function handleAuthError() {
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
@@ -51,15 +50,11 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshToken = localStorage.getItem("refresh_token");
-        if (!refreshToken) {
-          handleAuthError();
-          throw error;
-        }
-
-        const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-          refresh_token: refreshToken,
-        });
+        const { data } = await axios.post(
+          `${API_BASE_URL}/auth/refresh`,
+          {},
+          { withCredentials: true },
+        );
 
         if (!data?.data?.access_token) {
           throw new Error("Refresh failed");
