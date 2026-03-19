@@ -65,7 +65,7 @@ class GatewayController extends Controller
             'Content-Type' => $response->header('Content-Type') ?: 'application/json',
         ];
 
-        if ($response->hasHeader('Set-Cookie')) {
+        if ($response->header('Set-Cookie')) {
             $headers['Set-Cookie'] = $response->header('Set-Cookie');
         }
 
