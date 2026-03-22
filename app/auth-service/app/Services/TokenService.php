@@ -27,11 +27,17 @@ class TokenService
         return DB::transaction(function () use ($user) {
             RefreshToken::where('user_id', $user->id)->delete();
 
-            return RefreshToken::create([
+            $rawToken = Str::random(64);
+
+            $refreshToken = RefreshToken::create([
                 'user_id' => $user->id,
-                'token' => Str::random(64),
-                'expires_at' => now()->addDays(30),
+                'token' => hash('sha256', $rawToken),
+                'expires_at' => now()->addMinutes(config('jwt.refresh_ttl')),
             ]);
+
+            $refreshToken->token = $rawToken;
+
+            return $refreshToken;
         });
 
     }

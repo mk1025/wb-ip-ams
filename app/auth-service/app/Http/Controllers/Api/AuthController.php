@@ -92,7 +92,9 @@ class AuthController extends Controller
                 return $this->unauthorized('Missing refresh token');
             }
 
-            $refreshToken = RefreshToken::where('token', $token)->first();
+            $hashedToken = hash('sha256', $token);
+
+            $refreshToken = RefreshToken::where('token', $hashedToken)->first();
 
             if (! $refreshToken || $refreshToken->isExpired()) {
                 return $this->unauthorized('Invalid or expired refresh token');
