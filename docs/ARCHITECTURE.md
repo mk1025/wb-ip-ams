@@ -17,6 +17,8 @@ All traffic goes through the Gateway. The frontend never calls Auth or IP direct
 
 Routes requests by path prefix and proxies them to the correct service. Forwards `Authorization`, `Cookie`, and standard `X-Forwarded-*` headers. Passes `Set-Cookie` from downstream responses back to the browser. Does not validate JWTs — that's each service's job. Returns `503` if a downstream service is unreachable.
 
+Rate limiting: 60 req/min per IP on all routes (`throttle:api`). Auth Service applies an additional 10 req/min per email (fallback to IP) on auth endpoints.
+
 ---
 
 ## Auth & Session Lifecycle
@@ -25,10 +27,10 @@ Every `login`, `register`, and `token_refresh`:
 
 1. Generates a UUID `session_id` and embeds it as a JWT claim.
 2. Issues an access token (RS256, expires per `JWT_TTL`).
-3. Issues a refresh token (64-char random string, stored in `refresh_tokens`) delivered as an `HttpOnly` cookie — path `/api/auth/refresh`, `SameSite=Lax`, `Secure` in production.
+3. Issues a refresh token (64-char random string; SHA-256 hash stored in `refresh_tokens`) delivered as an `HttpOnly` cookie — path `/api/auth/refresh`, `SameSite=Lax`, `Secure` in production.
 4. Writes an audit log entry with the `session_id`.
 
-When the access token expires, the browser sends the cookie to `POST /auth/refresh` automatically. A new access token and `session_id` are issued. The refresh token is never readable by JS.
+When the access token expires, the browser sends the cookie to `POST /auth/refresh` automatically. A new access token, refresh token, and `session_id` are issued (rotation — the old refresh token is deleted). The refresh token is never readable by JS.
 
 ### RS256 key pair
 
