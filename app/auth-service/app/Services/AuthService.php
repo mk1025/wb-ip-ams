@@ -92,11 +92,15 @@ class AuthService
 
         $newAccessToken = $this->tokenService->createAccessToken($user, $sessionId);
 
+        $newRefreshToken = $this->tokenService->createRefreshToken($user);
+
         $this->logService->logAuthEvent($user, AuthAuditLog::ACTION_TOKEN_REFRESH, $request, $sessionId);
 
         $resource = new TokenResource($newAccessToken);
 
-        return $this->success($resource);
+        $cookie = $this->refreshTokenCookie($newRefreshToken->token);
+
+        return $this->success($resource)->cookie($cookie);
 
     }
 
