@@ -211,16 +211,20 @@ class AuthTest extends AuthFeatureTestCase
             ->assertJsonPath('success', true);
     }
 
-    public function test_refresh_does_not_delete_the_refresh_token(): void
+    public function test_refresh_rotates_the_refresh_token(): void
     {
         $user = User::factory()->create();
 
         $refreshToken = app(TokenService::class)->createRefreshToken($user);
 
-        $this->withCredentials()->withUnencryptedCookie('refresh_token', $refreshToken->token)
+        $response = $this->withCredentials()->withUnencryptedCookie('refresh_token', $refreshToken->token)
             ->postJson(self::REFRESH_URL);
 
-        $this->assertDatabaseHas('refresh_tokens', ['id' => $refreshToken->id]);
+        $response->assertStatus(200);
+
+        $this->assertDatabaseMissing('refresh_tokens', ['id' => $refreshToken->id]);
+
+        $response->assertCookie('refresh_token');
     }
 
     public function test_refresh_returns_401_for_invalid_token(): void
