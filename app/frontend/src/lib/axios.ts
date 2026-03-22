@@ -21,6 +21,29 @@ const api = axios.create({
   },
 });
 
+let refreshPromise: Promise<string> | null = null;
+
+function doRefresh(): Promise<string> {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = axios
+    .post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true })
+    .then(({ data }) => {
+      const token: string = data?.data?.access_token;
+
+      if (!token) throw new Error("Refresh failed");
+
+      useAuthStore.getState().updateToken(token);
+
+      return token;
+    })
+    .finally(() => {
+      refreshPromise = null;
+    });
+
+  return refreshPromise;
+}
+
 api.interceptors.request.use(
   (config) => {
     const token = useAuthStore.getState().accessToken;
@@ -50,19 +73,10 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const { data } = await axios.post(
-          `${API_BASE_URL}/auth/refresh`,
-          {},
-          { withCredentials: true },
-        );
+        const token = await doRefresh();
 
-        if (!data?.data?.access_token) {
-          throw new Error("Refresh failed");
-        }
+        originalRequest.headers.Authorization = `Bearer ${token}`;
 
-        useAuthStore.getState().updateToken(data.data.access_token);
-
-        originalRequest.headers.Authorization = `Bearer ${data.data.access_token}`;
         return api(originalRequest);
       } catch (refreshError) {
         handleAuthError();
